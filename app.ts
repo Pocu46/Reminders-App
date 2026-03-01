@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction  } from 'express';
 import dotenv from 'dotenv';
 import remindersRoutes from './routes/reminders';
+import {connectToDB} from "./utils/dbConnect";
 
 dotenv.config();
 
@@ -19,6 +20,17 @@ app.use((req: Request, res: Response, next: NextFunction) =>{
 
 app.use('/reminders', remindersRoutes)
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-});
+const startServer = async (): Promise<void> => {
+    try {
+        await connectToDB();
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`)
+        });
+    } catch (error) {
+        console.error('Failed to start server: ', error)
+        process.exit(1)
+    }
+}
+
+startServer()
