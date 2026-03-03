@@ -1,26 +1,99 @@
 import mongoose from 'mongoose';
-import { Request, Response } from 'express';
+import {Request, Response, NextFunction} from 'express';
+import {IAuthRequest, IReminder} from "../utils/types";
 import {validationResult} from "express-validator";
-import {Reminder} from "../utils/types";
 import ReminderModel from "../models/reminder.model";
 
-export const createReminder = async (req: Request<Reminder>, res: Response) => {
+type CreateReminderParams = {
+    userId: string;
+}
+
+type CreateReminderBody = {
+    title: string;
+    text: string;
+}
+
+export const createReminder = async (req: Request<CreateReminderParams, {}, CreateReminderBody>, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
+    }
+
+    const { userId } = req.params
+    const { title, text } = req.body
+
+    const reminder = new ReminderModel({
+        title,
+        text,
+        creator: userId
+    })
+    try {
+        await reminder.save()
+
+        res.status(201).json({success: true, message: 'New Reminder created'})
+    } catch (error) {
+        console.error('Error creating reminder:', error);
+
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        })
+    }
+}
+
+export const getReminders = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const reminders = await ReminderModel.find().sort('-createdAt').lean()
+        res.status(200).json({message: 'Fetched Reminders successfully.', reminders})
+    } catch (error) {
+        const err = error as Error & {statusCode?: number}
+        if(!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
+}
+
+export const getReminder = async (req: IAuthRequest, res: Response, next: NextFunction) => {
+    const reminderId  = req.params?.id
+
+    try {
+        const existingReminder = await ReminderModel.findOne({_id: reminderId})
+        if(!existingReminder) {
+            const error = new Error('Could not find reminder.') as Error & { statusCode?: number }
+            error.statusCode = 404
+            throw error
+        }
+        res.status(200).json({message: 'Reminder fetched', reminder: existingReminder})
+    } catch (error) {
+        const err = error as Error & { statusCode?: number }
+
+        if(!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
+}
+
+export const editReminder = async (req: IReminder, res: Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    const { id, title, text } = req.body
+    // const { id, title, text } = req.body
 
-    const reminder = new ReminderModel({
-        title,
-        text,
-        creator: id
-    })
+    // const editedReminder = new ReminderModel({
+    //     title,
+    //     text,
+    //     creator: id
+    // })
     try {
-        await reminder.save()
+        // find reminder by ID
 
-        res.status(201).json({message: 'New Reminder created'})
+        // await editedReminder.save()    // reminder = editedReminder
+
+        res.status(200).json({message: 'ReminderModel was edited'})
     } catch (error) {
         if (error instanceof mongoose.Error.ValidationError) {
             return res.status(422).json({
@@ -34,32 +107,12 @@ export const createReminder = async (req: Request<Reminder>, res: Response) => {
             })
         }
 
-        console.error('Creating reminder Error: ', error);
+        console.error('Editing reminder Error: ', error);
 
         return res.status(500).json({
             message: 'Something went wrong. Please try again later.'
         })
     }
-}
-
-export const getReminders = (req: Request, res: Response) => {
-    res.status(200).json({reminders: []})
-}
-
-export const getReminder = (req: Request, res: Response) => {
-    console.log('Download ReminderModel by ID')
-}
-
-export const editReminder = (req: Request<Reminder>, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-        return res.status(422).json({message: 'Validation failed, entered data is incorrect.',errors: errors.array()})
-    }
-
-    const title: string = req.body?.title
-    const text: string = req.body?.text
-
-    res.status(200).json({message: 'ReminderModel was edited'})
 }
 
 export const deleteReminder = (req: Request, res: Response) => {

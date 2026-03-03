@@ -1,5 +1,5 @@
 import express from 'express';
-import {body} from 'express-validator';
+import {body, param} from 'express-validator';
 import {
     getReminders,
     getReminder,
@@ -11,6 +11,8 @@ import {
 const router = express.Router()
 
 router.post('/', [
+    param('userId')
+        .isString(),
     body('title')
         .trim()
         .isString()
@@ -24,20 +26,20 @@ router.post('/', [
 
 router.get('/', getReminders)
 
-router.get('/:id', getReminder)
+router.get('/:reminderId', getReminder)
 
-router.put('/:id', [
-        body('title')
-            .trim()
-            .isString()
-            .isLength({ min: 3 })
-            .withMessage('Title should be at least 3 characters long'),
-        body('text')
-            .isString()
-            .isLength({ min: 3 })
-            .withMessage('Text should be at least 3 characters long')
-    ], editReminder)
+// router.put('/:reminderId', [
+//         body('title')
+//             .trim()
+//             .isString()
+//             .isLength({ min: 3 })
+//             .withMessage('Title should be at least 3 characters long'),
+//         body('text')
+//             .isString()
+//             .isLength({ min: 3 })
+//             .withMessage('Text should be at least 3 characters long')
+//     ], editReminder)
 
-router.delete('/:id', deleteReminder)
+router.delete('/:reminderId', deleteReminder)
 
 export default router;

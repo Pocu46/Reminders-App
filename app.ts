@@ -18,9 +18,9 @@ app.use((req: Request, res: Response, next: NextFunction) =>{
     next()
 })
 
-app.use('/reminders', remindersRoutes)
+app.use('/user/:userId/reminders', remindersRoutes)
 
-const startServer = async (): Promise<void> => {
+const startServer = async () => {
     try {
         await connectToDB();
 

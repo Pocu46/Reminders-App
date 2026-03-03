@@ -1,10 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
+import {IReminder} from "../utils/types";
 
-export interface IReminder extends Document {
-    title: string;
-    text: string;
-    creator: mongoose.Types.ObjectId;
-}
+// export interface IReminder extends Document {
+//     title: string;
+//     text: string;
+//     creator: mongoose.Types.ObjectId;
+//     createdAt: Date;
+//     updatedAt: Date;
+// }
 
 const reminderSchema = new Schema<IReminder>({
     title: {
@@ -16,8 +19,9 @@ const reminderSchema = new Schema<IReminder>({
         required: [true, 'Text is required']
     },
     creator: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
+        // type: Schema.Types.ObjectId,
+        // ref: 'User',
         required: [true, 'Creator ID is required']
     }
 }, {

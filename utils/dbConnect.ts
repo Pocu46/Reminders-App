@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' })
 
 export const connectToDB = async (): Promise<void> => {
     mongoose.set('strictQuery', true)
