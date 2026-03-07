@@ -17,3 +17,12 @@ export interface IReminder extends Document {
 export interface IAuthRequest extends Request {
     userId: string;
 }
+
+export type transformedReminder = {
+    id: string;
+    title: string;
+    text: string;
+    creator: string | mongoose.Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+}

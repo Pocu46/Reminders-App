@@ -1,13 +1,8 @@
 import mongoose from 'mongoose';
 import {Request, Response, NextFunction} from 'express';
-import {IAuthRequest, IReminder, CreateReminderBody} from "../utils/types";
+import {IAuthRequest, IReminder, CreateReminderBody, transformedReminder} from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
-
-// type CreateReminderBody = {
-//     title: string;
-//     text: string;
-// }
 
 export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response) => {
     const errors = validationResult(req)
@@ -41,7 +36,17 @@ export const getReminders = async (req: Request, res: Response, next: NextFuncti
     const userId = '123'
     try {
         const reminders = await Reminder.find({creator: userId}).sort('-createdAt').lean()
-        res.status(200).json({message: 'Fetched Reminders successfully.', reminders})
+
+        const transformedReminders: transformedReminder[] = reminders.map(reminder => ({
+            id: reminder._id.toString(),
+            title: reminder.title,
+            text: reminder.text,
+            creator: reminder.creator,
+            createdAt: reminder.createdAt,
+            updatedAt: reminder.updatedAt
+        }))
+
+        res.status(200).json({success: true,message: 'Fetched Reminders successfully.', reminders: transformedReminders})
     } catch (error) {
         const err = error as Error & {statusCode?: number}
         if(!err.statusCode) {

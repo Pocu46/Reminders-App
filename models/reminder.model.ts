@@ -20,6 +20,6 @@ const reminderSchema = new Schema<IReminder>({
     timestamps: true
 });
 
-const Reminder = mongoose.model<IReminder>('ReminderModel', reminderSchema);
+const Reminder = mongoose.model<IReminder>('Reminder', reminderSchema);
 
 export default Reminder;
