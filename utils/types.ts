@@ -1,13 +1,10 @@
 import { Request } from 'express';
 import mongoose, { Document } from 'mongoose';
 
-// export interface IReminder extends Document {
-//     userId: string,
-//     title: string;
-//     text: string;
-//     createdAt: Date;
-//     updatedAt: Date;
-// }
+export type CreateReminderBody = {
+    title: string;
+    text: string;
+}
 
 export interface IReminder extends Document {
     title: string;
@@ -18,5 +15,5 @@ export interface IReminder extends Document {
 }
 
 export interface IAuthRequest extends Request {
-    userId?: string;
+    userId: string;
 }

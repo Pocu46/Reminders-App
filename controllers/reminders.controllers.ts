@@ -1,17 +1,13 @@
 import mongoose from 'mongoose';
 import {Request, Response, NextFunction} from 'express';
-import {IAuthRequest, IReminder} from "../utils/types";
+import {IAuthRequest, IReminder, CreateReminderBody} from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
 
-// type CreateReminderParams = {
-//     userId: string;
+// type CreateReminderBody = {
+//     title: string;
+//     text: string;
 // }
-
-type CreateReminderBody = {
-    title: string;
-    text: string;
-}
 
 export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response) => {
     const errors = validationResult(req)
@@ -42,8 +38,9 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
 }
 
 export const getReminders = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = '123'
     try {
-        const reminders = await Reminder.find().sort('-createdAt').lean()
+        const reminders = await Reminder.find({creator: userId}).sort('-createdAt').lean()
         res.status(200).json({message: 'Fetched Reminders successfully.', reminders})
     } catch (error) {
         const err = error as Error & {statusCode?: number}
