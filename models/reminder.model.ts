@@ -1,14 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import {IReminder} from "../utils/types";
 
-// export interface IReminder extends Document {
-//     title: string;
-//     text: string;
-//     creator: mongoose.Types.ObjectId;
-//     createdAt: Date;
-//     updatedAt: Date;
-// }
-
 const reminderSchema = new Schema<IReminder>({
     title: {
         type: String,
@@ -22,12 +14,12 @@ const reminderSchema = new Schema<IReminder>({
         type: String,
         // type: Schema.Types.ObjectId,
         // ref: 'User',
-        required: [true, 'Creator ID is required']
+        // required: [true, 'Creator ID is required']
     }
 }, {
     timestamps: true
 });
 
-const ReminderModel = mongoose.model<IReminder>('ReminderModel', reminderSchema);
+const Reminder = mongoose.model<IReminder>('ReminderModel', reminderSchema);
 
-export default ReminderModel;
+export default Reminder;

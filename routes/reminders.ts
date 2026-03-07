@@ -11,8 +11,8 @@ import {
 const router = express.Router()
 
 router.post('/', [
-    param('userId')
-        .isString(),
+    // param('userId')
+    //     .isString(),
     body('title')
         .trim()
         .isString()

@@ -2,27 +2,27 @@ import mongoose from 'mongoose';
 import {Request, Response, NextFunction} from 'express';
 import {IAuthRequest, IReminder} from "../utils/types";
 import {validationResult} from "express-validator";
-import ReminderModel from "../models/reminder.model";
+import Reminder from "../models/reminder.model";
 
-type CreateReminderParams = {
-    userId: string;
-}
+// type CreateReminderParams = {
+//     userId: string;
+// }
 
 type CreateReminderBody = {
     title: string;
     text: string;
 }
 
-export const createReminder = async (req: Request<CreateReminderParams, {}, CreateReminderBody>, res: Response) => {
+export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    const { userId } = req.params
+    const userId = '123'
     const { title, text } = req.body
 
-    const reminder = new ReminderModel({
+    const reminder = new Reminder({
         title,
         text,
         creator: userId
@@ -43,7 +43,7 @@ export const createReminder = async (req: Request<CreateReminderParams, {}, Crea
 
 export const getReminders = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const reminders = await ReminderModel.find().sort('-createdAt').lean()
+        const reminders = await Reminder.find().sort('-createdAt').lean()
         res.status(200).json({message: 'Fetched Reminders successfully.', reminders})
     } catch (error) {
         const err = error as Error & {statusCode?: number}
@@ -58,7 +58,7 @@ export const getReminder = async (req: IAuthRequest, res: Response, next: NextFu
     const reminderId  = req.params?.id
 
     try {
-        const existingReminder = await ReminderModel.findOne({_id: reminderId})
+        const existingReminder = await Reminder.findOne({_id: reminderId})
         if(!existingReminder) {
             const error = new Error('Could not find reminder.') as Error & { statusCode?: number }
             error.statusCode = 404
