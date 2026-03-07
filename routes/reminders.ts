@@ -26,7 +26,7 @@ router.post('/', [
 
 router.get('/', getReminders)
 
-// router.get('/:reminderId', getReminder)
+router.get('/:reminderId', getReminder)
 
 // router.put('/:reminderId', [
 //         body('title')

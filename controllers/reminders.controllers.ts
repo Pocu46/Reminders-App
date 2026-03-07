@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import {Request, Response, NextFunction} from 'express';
+import mongoose from "mongoose";
+import {Request, Response, NextFunction} from "express";
 import {IAuthRequest, IReminder, CreateReminderBody, transformedReminder} from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
@@ -56,20 +56,24 @@ export const getReminders = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
-export const getReminder = async (req: IAuthRequest, res: Response, next: NextFunction) => {
-    const reminderId  = req.params?.id
+export const getReminder = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = '123'
+
+    const reminderId  = req.params?.reminderId
+
+    if(!reminderId) {
+        return res.status(400).json({success: false, message: 'Reminder ID required.'})
+    }
 
     try {
-        const existingReminder = await Reminder.findOne({_id: reminderId})
+        const existingReminder: transformedReminder | null = await Reminder.findOne({_id: reminderId, creator: userId})
         if(!existingReminder) {
-            const error = new Error('Could not find reminder.') as Error & { statusCode?: number }
-            error.statusCode = 404
-            throw error
+            return res.status(404).json({success: false, message: 'Could not find Reminder.'})
         }
+
         res.status(200).json({message: 'Reminder fetched', reminder: existingReminder})
     } catch (error) {
         const err = error as Error & { statusCode?: number }
-
         if(!err.statusCode) {
             err.statusCode = 500
         }
