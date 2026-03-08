@@ -68,7 +68,7 @@ export const getReminder = async (req: Request, res: Response, next: NextFunctio
     try {
         const existingReminder: transformedReminder | null = await Reminder.findOne({_id: reminderId, creator: userId})
         if(!existingReminder) {
-            return res.status(404).json({success: false, message: 'Could not find Reminder.'})
+            return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
         res.status(200).json({message: 'Reminder fetched', reminder: existingReminder})
@@ -81,46 +81,63 @@ export const getReminder = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
-export const editReminder = async (req: IReminder, res: Response) => {
+export const editReminder = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    // const { id, title, text } = req.body
+    const userId = '123'
+    const reminderId  = req.params?.reminderId
+    const { title, text } = req.body
 
-    // const editedReminder = new ReminderModel({
-    //     title,
-    //     text,
-    //     creator: id
-    // })
+    if(!reminderId) {
+        return res.status(400).json({success: false, message: 'Reminder ID required.'})
+    }
+
+    const editedReminder = {
+        title,
+        text,
+        updatedAt: new Date()
+    }
     try {
-        // find reminder by ID
+        const reminder = await Reminder.findOneAndUpdate(
+            { _id: reminderId, creator: userId },
+            { $set: editedReminder },
+            { returnDocument: 'after', runValidators: true }
+        )
 
-        // await editedReminder.save()    // reminder = editedReminder
+        if(!reminder) {
+            return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
+        }
 
-        res.status(200).json({message: 'ReminderModel was edited'})
+        res.status(200).json({message: 'Reminder was updated'})
     } catch (error) {
-        if (error instanceof mongoose.Error.ValidationError) {
-            return res.status(422).json({
-                message: 'Validation failed',
-                errors: Object.values(error.errors).map(e => e.message)
-            })
+        const err = error as Error & { statusCode?: number }
+        if(!err.statusCode) {
+            err.statusCode = 500
         }
-        if (error instanceof mongoose.Error.CastError) {
-            return res.status(400).json({
-                message: 'Invalid data format'
-            })
-        }
-
-        console.error('Editing reminder Error: ', error);
-
-        return res.status(500).json({
-            message: 'Something went wrong. Please try again later.'
-        })
+        next(err)
     }
 }
 
-export const deleteReminder = (req: Request, res: Response) => {
-    console.log('Delete  ReminderModel')
+export const deleteReminder = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = '123'
+    const reminderId  = req.params?.reminderId
+
+    try {
+        const reminder = await Reminder.findOneAndDelete({_id: reminderId, creator: userId})
+
+        if (!reminder) {
+            return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
+        }
+
+        res.status(200).json({message: 'Reminder was deleted'})
+    } catch (error) {
+        const err = error as Error & { statusCode?: number }
+        if(!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
 }
