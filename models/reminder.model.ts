@@ -14,7 +14,7 @@ const reminderSchema = new Schema<IReminder>({
         type: String,
         // type: Schema.Types.ObjectId,
         // ref: 'User',
-        // required: [true, 'Creator ID is required']
+        required: [true, 'Creator ID is required']
     }
 }, {
     timestamps: true

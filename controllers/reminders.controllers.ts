@@ -125,6 +125,10 @@ export const deleteReminder = async (req: Request, res: Response, next: NextFunc
     const userId = '123'
     const reminderId  = req.params?.reminderId
 
+    if(!reminderId) {
+        return res.status(400).json({success: false, message: 'Reminder ID required.'})
+    }
+
     try {
         const reminder = await Reminder.findOneAndDelete({_id: reminderId, creator: userId})
 
