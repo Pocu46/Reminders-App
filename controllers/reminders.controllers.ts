@@ -1,10 +1,22 @@
-import mongoose from "mongoose";
 import {Request, Response, NextFunction} from "express";
-import {IAuthRequest, IReminder, CreateReminderBody, transformedReminder} from "../utils/types";
+import {
+    CreateReminderBody,
+    transformedReminder,
+    CreateReminderSuccessResponse,
+    CreateReminderErrorResponse,
+    GetRemindersSuccessResponse,
+    GetReminderSuccessResponse,
+    GetReminderErrorResponse,
+    EditReminderSuccessResponse,
+    EditReminderErrorResponse,
+    EditReminderValidationErrorResponse,
+    DeleteReminderSuccessResponse,
+    DeleteReminderErrorResponse
+} from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
 
-export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response) => {
+export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
@@ -23,16 +35,16 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
 
         res.status(201).json({success: true, message: 'New Reminder created'})
     } catch (error) {
-        console.error('Error creating reminder:', error);
+        console.error('Error creating reminder: ', error);
 
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Internal server error.'
         })
     }
 }
 
-export const getReminders = async (req: Request, res: Response, next: NextFunction) => {
+export const getReminders = async (req: Request, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
     const userId = '123'
     try {
         const reminders = await Reminder.find({creator: userId}).sort('-createdAt').lean()
@@ -46,7 +58,7 @@ export const getReminders = async (req: Request, res: Response, next: NextFuncti
             updatedAt: reminder.updatedAt
         }))
 
-        res.status(200).json({success: true,message: 'Fetched Reminders successfully.', reminders: transformedReminders})
+        res.status(200).json({success: true, message: 'Fetched Reminders successfully.', reminders: transformedReminders})
     } catch (error) {
         const err = error as Error & {statusCode?: number}
         if(!err.statusCode) {
@@ -56,7 +68,7 @@ export const getReminders = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
-export const getReminder = async (req: Request, res: Response, next: NextFunction) => {
+export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<GetReminderSuccessResponse | GetReminderErrorResponse>, next: NextFunction) => {
     const userId = '123'
 
     const reminderId  = req.params?.reminderId
@@ -71,7 +83,7 @@ export const getReminder = async (req: Request, res: Response, next: NextFunctio
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
-        res.status(200).json({message: 'Reminder fetched', reminder: existingReminder})
+        res.status(200).json({success: true, message: 'Reminder fetched', reminder: existingReminder})
     } catch (error) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {
@@ -81,7 +93,7 @@ export const getReminder = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
-export const editReminder = async (req: Request, res: Response, next: NextFunction) => {
+export const editReminder = async (req: Request<{reminderId: string}, {}, CreateReminderBody>, res: Response<EditReminderSuccessResponse | EditReminderErrorResponse | EditReminderValidationErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
@@ -111,7 +123,7 @@ export const editReminder = async (req: Request, res: Response, next: NextFuncti
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
-        res.status(200).json({message: 'Reminder was updated'})
+        res.status(200).json({success: true, message: 'Reminder was updated'})
     } catch (error) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {
@@ -121,7 +133,7 @@ export const editReminder = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
-export const deleteReminder = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<DeleteReminderSuccessResponse | DeleteReminderErrorResponse>, next: NextFunction) => {
     const userId = '123'
     const reminderId  = req.params?.reminderId
 
@@ -136,7 +148,7 @@ export const deleteReminder = async (req: Request, res: Response, next: NextFunc
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
-        res.status(200).json({message: 'Reminder was deleted'})
+        res.status(200).json({success: true, message: 'Reminder was deleted'})
     } catch (error) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {

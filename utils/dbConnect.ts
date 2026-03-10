@@ -20,6 +20,10 @@ export const connectToDB = async (): Promise<void> => {
             maxPoolSize: 10,
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
+            family: 4,
+            retryWrites: true,
+            retryReads: true,
+            connectTimeoutMS: 10000,
         });
         console.log('MongoDB connected successfully')
     } catch (error) {
