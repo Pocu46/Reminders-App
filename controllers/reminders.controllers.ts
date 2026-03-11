@@ -34,7 +34,7 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
         await reminder.save()
 
         res.status(201).json({success: true, message: 'New Reminder created'})
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error creating reminder: ', error);
 
         res.status(500).json({
@@ -59,7 +59,7 @@ export const getReminders = async (req: Request, res: Response<GetRemindersSucce
         }))
 
         res.status(200).json({success: true, message: 'Fetched Reminders successfully.', reminders: transformedReminders})
-    } catch (error) {
+    } catch (error: unknown) {
         const err = error as Error & {statusCode?: number}
         if(!err.statusCode) {
             err.statusCode = 500
@@ -84,7 +84,7 @@ export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, re
         }
 
         res.status(200).json({success: true, message: 'Reminder fetched', reminder: existingReminder})
-    } catch (error) {
+    } catch (error: unknown) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {
             err.statusCode = 500
@@ -124,7 +124,7 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
         }
 
         res.status(200).json({success: true, message: 'Reminder was updated'})
-    } catch (error) {
+    } catch (error: unknown) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {
             err.statusCode = 500
@@ -149,7 +149,7 @@ export const deleteReminder = async (req: Request<{reminderId: string}, {}, {}>,
         }
 
         res.status(200).json({success: true, message: 'Reminder was deleted'})
-    } catch (error) {
+    } catch (error: unknown) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {
             err.statusCode = 500

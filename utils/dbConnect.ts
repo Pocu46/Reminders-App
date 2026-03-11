@@ -26,7 +26,7 @@ export const connectToDB = async (): Promise<void> => {
             connectTimeoutMS: 10000,
         });
         console.log('MongoDB connected successfully')
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('MongoDB connection error:', error)
         throw error
     }

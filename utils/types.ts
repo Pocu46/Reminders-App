@@ -8,6 +8,17 @@ export interface IReminder extends Document {
     updatedAt: Date;
 }
 
+export interface IUser {
+    id?: string;
+    name?: string;
+    email: string;
+    password: string;
+    image: {
+        imageName: string,
+        imageLink: string
+    };
+}
+
 export type CreateReminderBody = {
     title: string;
     text: string;
@@ -73,4 +84,10 @@ export type DeleteReminderSuccessResponse = {
 export type DeleteReminderErrorResponse = {
     success: false;
     message: string;
+}
+
+export type CreateUser = {
+    email: string;
+    password: string;
+    confirmPassword: string;
 }
