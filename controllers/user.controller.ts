@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
 import {validationResult} from "express-validator";
 import User from "../models/user.model";
-import {hashPassword} from "../utils/helpers";
+import {comparePasswords, hashPassword} from "../utils/helpers";
 import {CreateReminderErrorResponse, CreateReminderSuccessResponse, CreateUser} from "../utils/types";
 
 export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
@@ -43,7 +43,38 @@ export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Res
 }
 
 export const userLogin = async(req: Request, res: Response, next: NextFunction) => {
-    console.log("User Login")
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            success: false,
+            message: 'Validation failed, entered data is incorrect.',
+            errors: errors.array()
+        })
+    }
+
+    const {email, password} = req.body
+
+    try {
+        const user = await User.findOne({email})
+
+        if (!user) {
+            return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
+        }
+
+        const isPasswordMatch: boolean = await comparePasswords(password, user.password)
+
+        if (!isPasswordMatch) {
+            return res.status(401).json({success: false, message: 'Passwords don\'t match!'})
+        }
+
+        res.status(200).json({success: true, message: 'The User is logged!'})
+    } catch (error: unknown) {
+        const err = error as Error & {statusCode?: number}
+        if(!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
 }
 
 export const getUserData = async (req: Request, res: Response, next: NextFunction) => {
