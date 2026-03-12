@@ -91,3 +91,8 @@ export type CreateUser = {
     password: string;
     confirmPassword: string;
 }
+
+export type UserLogin = {
+    email: string;
+    password: string;
+}

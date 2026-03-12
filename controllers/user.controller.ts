@@ -2,7 +2,7 @@ import {Request, Response, NextFunction} from "express";
 import {validationResult} from "express-validator";
 import User from "../models/user.model";
 import {comparePasswords, hashPassword} from "../utils/helpers";
-import {CreateReminderErrorResponse, CreateReminderSuccessResponse, CreateUser} from "../utils/types";
+import {CreateReminderErrorResponse, CreateReminderSuccessResponse, CreateUser, UserLogin} from "../utils/types";
 
 export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
@@ -42,7 +42,7 @@ export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Res
     }
 }
 
-export const userLogin = async(req: Request, res: Response, next: NextFunction) => {
+export const userLogin = async(req: Request<{}, {}, UserLogin>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({

@@ -71,7 +71,7 @@ router.post('/login', [
         .matches(/^[a-zA-Z0-9]+$/)
         .withMessage('Password should contain only letters and digits.')
 ], userLogin)
-router.get('/', getUserData)
+router.get('/:userId', getUserData)
 router.put('/:userId', [
     body('email')
         .trim()
