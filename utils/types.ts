@@ -9,6 +9,7 @@ export interface IReminder extends Document {
 }
 
 export interface IUser {
+    _id: mongoose.Types.ObjectId | string;
     id?: string;
     email: string;
     password: string;
@@ -116,5 +117,5 @@ export type TransformedUser = {
 export type GetUserDataSuccessResponse = {
     success: boolean;
     message: string;
-    user?: TransformedUser
+    user: TransformedUser
 }

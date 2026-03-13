@@ -100,7 +100,7 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
     }
 
     const userId = '123'
-    const reminderId  = req.params?.reminderId
+    const reminderId  = req.params.reminderId
     const { title, text } = req.body
 
     if(!reminderId) {
