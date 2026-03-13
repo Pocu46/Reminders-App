@@ -2,7 +2,13 @@ import {Request, Response, NextFunction} from "express";
 import {validationResult} from "express-validator";
 import User from "../models/user.model";
 import {comparePasswords, hashPassword} from "../utils/helpers";
-import {CreateReminderErrorResponse, CreateReminderSuccessResponse, CreateUser, UserLogin} from "../utils/types";
+import {
+    CreateReminderErrorResponse,
+    CreateReminderSuccessResponse,
+    CreateUser, GetUserDataSuccessResponse, TransformedUser,
+    UserFromDB,
+    UserLogin
+} from "../utils/types";
 
 export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
@@ -77,8 +83,29 @@ export const userLogin = async(req: Request<{}, {}, UserLogin>, res: Response<Cr
     }
 }
 
-export const getUserData = async (req: Request, res: Response, next: NextFunction) => {
-    res.status(200).json({success: true, message: 'User Data fetched.'})
+export const getUserData = async (req: Request<{userId: string}>, res: Response<GetUserDataSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
+    const userId = req.params.userId
+
+    try {
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
+        }
+        const transformedUser: TransformedUser = {
+            id: user._id.toString(),
+            email: user.email,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        }
+
+        res.status(200).json({success: true, message: 'User Data fetched.', user: transformedUser})
+    }catch (error: unknown) {
+        const err = error as Error & {statusCode?: number}
+        if(!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
 }
 
 export const userUpdate = async(req: Request, res: Response, next: NextFunction) => {

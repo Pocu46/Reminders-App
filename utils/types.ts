@@ -10,13 +10,14 @@ export interface IReminder extends Document {
 
 export interface IUser {
     id?: string;
-    name?: string;
     email: string;
     password: string;
     image: {
         imageName: string,
         imageLink: string
     };
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export type CreateReminderBody = {
@@ -95,4 +96,25 @@ export type CreateUser = {
 export type UserLogin = {
     email: string;
     password: string;
+}
+
+export type UserFromDB = {
+    _id: mongoose.Types.ObjectId;
+    email: string;
+    password: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type TransformedUser = {
+    id: string;
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type GetUserDataSuccessResponse = {
+    success: boolean;
+    message: string;
+    user?: TransformedUser
 }
