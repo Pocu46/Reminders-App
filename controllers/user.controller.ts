@@ -88,7 +88,7 @@ export const getUserData = async (req: Request<{userId: string}>, res: Response<
     const userId = req.params.userId
 
     try {
-        const user: IUser | null = await User.findById({_id: userId})
+        const user: IUser | null = await User.findById(userId)
         if (!user) {
             return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
         }
@@ -135,7 +135,7 @@ export const userUpdate = async(req: Request<{userId: string}, {}, CreateUser>, 
             updatedAt: new Date()
         }
 
-        const user: IUser | null = await User.findById({_id: userId})
+        const user: IUser | null = await User.findById(userId)
         if (!user) {
             return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
         }
@@ -164,6 +164,23 @@ export const userImageUpdate = async(req: Request, res: Response, next: NextFunc
     console.log("User Image Update")
 }
 
-export const userDelete = async(req: Request, res: Response, next: NextFunction) => {
-    console.log("User Delete")
+export const userDelete = async(req: Request<{userId: string}, {}, {}>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
+    const userId = req.params.userId
+
+    try {
+        await Reminder.deleteMany({creator: userId})
+
+        const user: IUser | null = await User.findByIdAndDelete(userId)
+        if (!user) {
+            return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
+        }
+
+        res.status(200).json({success: true, message: 'User was deleted.'})
+    } catch (error: unknown) {
+        const err = error as Error & {statusCode?: number}
+        if(!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
 }

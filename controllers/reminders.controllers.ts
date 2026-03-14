@@ -22,7 +22,7 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
         return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    const userId = '123'
+    const userId = '69b18a76eed1d10cfaa7a873'
     const { title, text } = req.body
 
     const reminder = new Reminder({
