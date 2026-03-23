@@ -5,8 +5,7 @@ import {comparePasswords, hashPassword} from "../utils/helpers";
 import {
     CreateReminderErrorResponse,
     CreateReminderSuccessResponse,
-    CreateUser, GetUserDataSuccessResponse, IUser, TransformedUser,
-    UserFromDB,
+    CreateUser, GetUserDataSuccessResponse, IUser, TransformedUser, UserFromDB,
     UserLogin
 } from "../utils/types";
 import Reminder from "../models/reminder.model";
@@ -140,7 +139,7 @@ export const userUpdate = async(req: Request<{userId: string}, {}, CreateUser>, 
             return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
         }
 
-        const updatedUser = await User.findOneAndUpdate(
+        const updatedUser: UserFromDB | null = await User.findOneAndUpdate(
             { _id: user._id, createdAt: user.createdAt },
             { $set: editedUser },
             { returnDocument: 'after', runValidators: true }
