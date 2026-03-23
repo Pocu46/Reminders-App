@@ -11,7 +11,7 @@ import {
     EditReminderErrorResponse,
     EditReminderValidationErrorResponse,
     DeleteReminderSuccessResponse,
-    DeleteReminderErrorResponse
+    DeleteReminderErrorResponse, reminderDB
 } from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
@@ -47,7 +47,7 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
 export const getReminders = async (req: Request, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
     const userId = '123'
     try {
-        const reminders = await Reminder.find({creator: userId}).sort('-createdAt').lean()
+        const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort('-createdAt').lean()
 
         const transformedReminders: transformedReminder[] = reminders.map(reminder => ({
             id: reminder._id.toString(),
@@ -71,19 +71,28 @@ export const getReminders = async (req: Request, res: Response<GetRemindersSucce
 export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<GetReminderSuccessResponse | GetReminderErrorResponse>, next: NextFunction) => {
     const userId = '123'
 
-    const reminderId  = req.params?.reminderId
+    const reminderId= req.params?.reminderId
 
     if(!reminderId) {
         return res.status(400).json({success: false, message: 'Reminder ID required.'})
     }
 
     try {
-        const existingReminder: transformedReminder | null = await Reminder.findOne({_id: reminderId, creator: userId})
+        const existingReminder: reminderDB | null = await Reminder.findOne({_id: reminderId, creator: userId})
         if(!existingReminder) {
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
-        res.status(200).json({success: true, message: 'Reminder fetched', reminder: existingReminder})
+        const transformedReminder: transformedReminder = {
+            id: existingReminder._id.toString(),
+            title: existingReminder.title,
+            text: existingReminder.text,
+            creator: existingReminder.creator,
+            createdAt: existingReminder.createdAt,
+            updatedAt: existingReminder.updatedAt
+        }
+
+        res.status(200).json({success: true, message: 'Reminder fetched', reminder: transformedReminder})
     } catch (error: unknown) {
         const err = error as Error & { statusCode?: number }
         if(!err.statusCode) {

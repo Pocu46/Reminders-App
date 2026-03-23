@@ -26,6 +26,15 @@ export type CreateReminderBody = {
     text: string;
 }
 
+export type reminderDB = {
+    _id: string | mongoose.Types.ObjectId;
+    title: string;
+    text: string;
+    creator: string | mongoose.Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export type transformedReminder = {
     id: string;
     title: string;
