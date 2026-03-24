@@ -2,6 +2,7 @@ import {Request, Response, NextFunction} from "express";
 import {validationResult} from "express-validator";
 import User from "../models/user.model";
 import {comparePasswords, hashPassword} from "../utils/helpers";
+import path from "path";
 import {
     CreateReminderErrorResponse,
     CreateReminderSuccessResponse,
@@ -22,12 +23,19 @@ export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Res
         return res.status(400).json({success: false, message: 'Password and Confirm Password fields should match.'})
     }
 
+    const avatarPath: string = path.join(__dirname, '../images/default-avatar.png')
+    const avatarName: string = 'default-avatar.png'
+
     try {
         const hashedPassword = await hashPassword(password, 12)
 
         const user = new User({
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            image: {
+                imageName: `${new Date().toISOString()}-${avatarName.replace(/:/g, '-')}`,
+                imageLink: avatarPath
+            }
         })
 
         const isUserExist = await User.findOne({email})
@@ -95,6 +103,10 @@ export const getUserData = async (req: Request<{userId: string}>, res: Response<
         const transformedUser: TransformedUser = {
             id: user._id.toString(),
             email: user.email,
+            image: {
+                imageName: user.image.imageName,
+                imageLink: user.image.imageLink
+            },
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         }

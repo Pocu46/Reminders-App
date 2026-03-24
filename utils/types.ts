@@ -10,7 +10,6 @@ export interface IReminder extends Document {
 
 export interface IUser {
     _id: mongoose.Types.ObjectId | string;
-    id?: string;
     email: string;
     password: string;
     image: {
@@ -119,6 +118,10 @@ export type UserFromDB = {
 export type TransformedUser = {
     id: string;
     email: string;
+    image: {
+        imageName: string,
+        imageLink: string
+    };
     createdAt: Date;
     updatedAt: Date;
 }

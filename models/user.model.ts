@@ -11,11 +11,10 @@ const userSchema = new Schema({
         type: String,
         required: [true, 'Password is required for DB.'],
     },
-    // image: {
-    //     // type: String
-    //     imageName: {type: String},
-    //     imageLink: {type: String},
-    // },
+    image: {
+        imageName: {type: String},
+        imageLink: {type: String},
+    }
 }, {
     timestamps: true
 })
