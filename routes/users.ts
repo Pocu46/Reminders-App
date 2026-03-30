@@ -8,6 +8,7 @@ import {
     userRegistration,
     userUpdate
 } from "../controllers/user.controller";
+import { upload } from '../utils/multer';
 
 const router = express.Router()
 
@@ -109,7 +110,7 @@ router.put('/:userId', [
         .matches(/^[a-zA-Z0-9]+$/)
         .withMessage('Confirm Password should contain only letters and digits.')
 ], userUpdate)
-router.put('/:userId/avatar', userImageUpdate)
+router.put('/:userId/avatar', upload.single('image'), userImageUpdate)
 router.delete('/:userId', userDelete)
 
 export default router;
