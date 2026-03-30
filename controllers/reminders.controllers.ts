@@ -11,12 +11,12 @@ import {
     EditReminderErrorResponse,
     EditReminderValidationErrorResponse,
     DeleteReminderSuccessResponse,
-    DeleteReminderErrorResponse, reminderDB
+    DeleteReminderErrorResponse, reminderDB, HttpError
 } from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
 
-export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>) => {
+export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
@@ -35,12 +35,12 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
 
         res.status(201).json({success: true, message: 'New Reminder created'})
     } catch (error: unknown) {
-        console.error('Error creating reminder: ', error);
-
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error.'
-        })
+        const err = error as HttpError
+        if(!err.statusCode) {
+            err.statusCode = 500
+            err.success = false
+        }
+        next(err)
     }
 }
 
@@ -60,9 +60,10 @@ export const getReminders = async (req: Request, res: Response<GetRemindersSucce
 
         res.status(200).json({success: true, message: 'Fetched Reminders successfully.', reminders: transformedReminders})
     } catch (error: unknown) {
-        const err = error as Error & {statusCode?: number}
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
@@ -94,9 +95,10 @@ export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, re
 
         res.status(200).json({success: true, message: 'Reminder fetched', reminder: transformedReminder})
     } catch (error: unknown) {
-        const err = error as Error & { statusCode?: number }
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
@@ -134,9 +136,10 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
 
         res.status(200).json({success: true, message: 'Reminder was updated'})
     } catch (error: unknown) {
-        const err = error as Error & { statusCode?: number }
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
@@ -159,9 +162,10 @@ export const deleteReminder = async (req: Request<{reminderId: string}, {}, {}>,
 
         res.status(200).json({success: true, message: 'Reminder was deleted'})
     } catch (error: unknown) {
-        const err = error as Error & { statusCode?: number }
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }

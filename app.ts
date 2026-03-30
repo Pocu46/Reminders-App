@@ -5,6 +5,7 @@ import userRoutes from './routes/users';
 import path from 'path';
 import multer from 'multer';
 import {connectToDB} from "./utils/dbConnect";
+import {HttpError} from "./utils/types";
 
 dotenv.config()
 
@@ -36,8 +37,8 @@ const fileFilter = (req: Request, file: Express.Multer.File, callback: multer.Fi
 // })
 
 app.use(express.json())
-app.use(multer({storage: fileStorage, fileFilter}).single('image'))
 app.use(express.urlencoded({ extended: true }))
+app.use(multer({storage: fileStorage, fileFilter}).single('image'))
 app.use(`${API_PREFIX}/images`, express.static(path.join(__dirname, 'images')))
 
 app.use((req: Request, res: Response, next: NextFunction) =>{
@@ -55,7 +56,7 @@ app.use((req: Request, res: Response, next: NextFunction) =>{
 app.use(`${API_PREFIX}/user`, userRoutes)
 app.use(`${API_PREFIX}/reminders`, remindersRoutes)
 
-app.use((error: Error & {statusCode?: number}, req: Request, res: Response, next: NextFunction) =>{
+app.use((error: HttpError, req: Request, res: Response, next: NextFunction) =>{
     console.error(error)
     const status = error.statusCode || 500
     const message = error.message

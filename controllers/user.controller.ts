@@ -7,7 +7,7 @@ import {
     CreateReminderErrorResponse,
     CreateReminderSuccessResponse,
     CreateUser, GetUserDataSuccessResponse, IUser, TransformedUser, UserFromDB,
-    UserLogin
+    UserLogin, HttpError
 } from "../utils/types";
 import Reminder from "../models/reminder.model";
 
@@ -48,9 +48,10 @@ export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Res
 
         res.status(201).json({success: true, message: 'New User created'})
     } catch (error: unknown) {
-        const err = error as Error & {statusCode?: number}
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
@@ -83,9 +84,10 @@ export const userLogin = async(req: Request<{}, {}, UserLogin>, res: Response<Cr
 
         res.status(200).json({success: true, message: 'The User is logged!'})
     } catch (error: unknown) {
-        const err = error as Error & {statusCode?: number}
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
@@ -113,9 +115,10 @@ export const getUserData = async (req: Request<{userId: string}>, res: Response<
 
         res.status(200).json({success: true, message: 'User Data fetched.', user: transformedUser})
     } catch (error: unknown) {
-        const err = error as Error & {statusCode?: number}
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
@@ -163,16 +166,57 @@ export const userUpdate = async(req: Request<{userId: string}, {}, CreateUser>, 
 
         res.status(200).json({success: true, message: 'User was updated'})
     } catch (error: unknown) {
-        const err = error as Error & {statusCode?: number}
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }
 }
 
 export const userImageUpdate = async(req: Request, res: Response, next: NextFunction) => {
-    console.log("User Image Update")
+    if(!req.file) {
+        return res.status(422).json({success: false, message: 'No image found.'})
+    }
+
+    const imageName: string = `${new Date().toISOString()}-${req.file.originalname.replace(/:/g, '-')}`
+    const imageLink: string = req.file.path
+
+    const userId = req.params.userId
+
+    try {
+        const editedUser = {
+            image: {
+                imageName,
+                imageLink
+            }
+        }
+
+        const user: IUser | null = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
+        }
+
+        const updatedUser: UserFromDB | null = await User.findOneAndUpdate(
+            { _id: user._id, createdAt: user.createdAt },
+            { $set: editedUser },
+            { returnDocument: 'after', runValidators: true }
+        )
+
+        if(!updatedUser) {
+            return res.status(404).json({success: false, message: 'User doesn\'t found for update.'})
+        }
+
+        res.status(200).json({success: true, message: 'User was updated'})
+    } catch (error: unknown) {
+        const err = error as HttpError
+        if(!err.statusCode) {
+            err.statusCode = 500
+            err.success = false
+        }
+        next(err)
+    }
 }
 
 export const userDelete = async(req: Request<{userId: string}, {}, {}>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
@@ -188,9 +232,10 @@ export const userDelete = async(req: Request<{userId: string}, {}, {}>, res: Res
 
         res.status(200).json({success: true, message: 'User was deleted.'})
     } catch (error: unknown) {
-        const err = error as Error & {statusCode?: number}
+        const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500
+            err.success = false
         }
         next(err)
     }

@@ -20,6 +20,11 @@ export interface IUser {
     updatedAt: Date;
 }
 
+export interface HttpError extends Error {
+    statusCode?: number;
+    success?: boolean;
+}
+
 export type CreateReminderBody = {
     title: string;
     text: string;
