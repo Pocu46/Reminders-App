@@ -39,3 +39,27 @@ export const upload: multer.Multer = multer({
     storage: fileStorage,
     fileFilter
 })
+
+export const deleteImage = (filePath: string): void => {
+    try {
+        if (!filePath) return
+
+        const fileName = path.basename(filePath)
+
+        if (fileName === 'default-avatar.png') {
+            return
+        }
+
+        const fullPath = path.join(uploadDir, fileName)
+
+        if (fs.existsSync(fullPath)) {
+            fs.unlink(fullPath, (err) => {
+                if (err) {
+                    console.error('Failed to delete image:', err)
+                }
+            })
+        }
+    } catch (error) {
+        console.error('Error in deleteImage:', error)
+    }
+}

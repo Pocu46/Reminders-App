@@ -16,13 +16,16 @@ import {
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
 
-export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
+const userId: string = '69b18a76eed1d10cfaa7a873'
+
+export const createReminder = async (req: Request<{userId: string}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    const userId = '69b18a76eed1d10cfaa7a873'
+    // const userId = '69b18a76eed1d10cfaa7a873'
+    // const userId = req.params?.userId
     const { title, text } = req.body
 
     const reminder = new Reminder({
@@ -45,7 +48,7 @@ export const createReminder = async (req: Request<{}, {}, CreateReminderBody>, r
 }
 
 export const getReminders = async (req: Request, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
-    const userId = '123'
+    // const userId = '123'
     try {
         const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort('-createdAt').lean()
 
@@ -70,7 +73,7 @@ export const getReminders = async (req: Request, res: Response<GetRemindersSucce
 }
 
 export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<GetReminderSuccessResponse | GetReminderErrorResponse>, next: NextFunction) => {
-    const userId = '123'
+    // const userId = '123'
 
     const reminderId= req.params?.reminderId
 
@@ -110,7 +113,7 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
         return res.status(422).json({message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    const userId = '123'
+    // const userId = '123'
     const reminderId  = req.params.reminderId
     const { title, text } = req.body
 
@@ -146,8 +149,8 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
 }
 
 export const deleteReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<DeleteReminderSuccessResponse | DeleteReminderErrorResponse>, next: NextFunction) => {
-    const userId = '123'
-    const reminderId  = req.params?.reminderId
+    // const userId = '123'
+    const reminderId    = req.params?.reminderId
 
     if(!reminderId) {
         return res.status(400).json({success: false, message: 'Reminder ID required.'})
