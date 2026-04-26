@@ -40,25 +40,15 @@ export const upload: multer.Multer = multer({
     fileFilter
 })
 
-export const deleteImage = (filePath: string): void => {
+export const deleteImage = async (fileName: string): Promise<void> => {
     try {
-        if (!filePath) return
-
-        const fileName = path.basename(filePath)
-
-        if (fileName === 'default-avatar.png') {
-            return
-        }
+        if (!fileName) return
+        if (fileName === 'default-avatar.png') return
 
         const fullPath = path.join(uploadDir, fileName)
 
-        if (fs.existsSync(fullPath)) {
-            fs.unlink(fullPath, (err) => {
-                if (err) {
-                    console.error('Failed to delete image:', err)
-                }
-            })
-        }
+        await fs.promises.access(fullPath)
+        await fs.promises.unlink(fullPath)
     } catch (error) {
         console.error('Error in deleteImage:', error)
     }

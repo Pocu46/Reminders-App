@@ -10,6 +10,7 @@ import {
     UserLogin, HttpError
 } from "../utils/types";
 import Reminder from "../models/reminder.model";
+import {deleteImage} from "../utils/multer";
 
 export const userRegistration = async(req: Request<{}, {}, CreateUser>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
@@ -175,12 +176,12 @@ export const userUpdate = async(req: Request<{userId: string}, {}, CreateUser>, 
     }
 }
 
-export const userImageUpdate = async(req: Request, res: Response, next: NextFunction) => {
+export const userImageUpdate = async(req: Request<{userId: string}>, res: Response, next: NextFunction) => {
     if(!req.file) {
         return res.status(422).json({success: false, message: 'No image found.'})
     }
 
-    const imageName: string = `${new Date().toISOString()}-${req.file.originalname.replace(/:/g, '-')}`
+    const imageName = req.file.filename
     const imageLink: string = req.file.path
 
     const userId = req.params.userId
@@ -197,6 +198,8 @@ export const userImageUpdate = async(req: Request, res: Response, next: NextFunc
         if (!user) {
             return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
         }
+
+        await deleteImage(user.image.imageName)
 
         const updatedUser: UserFromDB | null = await User.findOneAndUpdate(
             { _id: user._id, createdAt: user.createdAt },
@@ -225,10 +228,14 @@ export const userDelete = async(req: Request<{userId: string}, {}, {}>, res: Res
     try {
         await Reminder.deleteMany({creator: userId})
 
-        const user: IUser | null = await User.findByIdAndDelete(userId)
+        const user: IUser | null = await User.findById(userId)
         if (!user) {
             return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
         }
+
+        await deleteImage(user.image.imageName)
+
+        await User.findByIdAndDelete(userId)
 
         res.status(200).json({success: true, message: 'User was deleted.'})
     } catch (error: unknown) {
