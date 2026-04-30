@@ -47,10 +47,16 @@ export const createReminder = async (req: Request<{userId: string}, {}, CreateRe
     }
 }
 
-export const getReminders = async (req: Request, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
+export const getReminders = async (req: Request<{}, {}, {}, {page?: string}>, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
     // const userId = '123'
+    const page: string | undefined = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page
+    const currentPage: number = Number(page) || 1
+    const perPage: number = 9
+    let totalReminders: number = 0
     try {
-        const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort('-createdAt').lean()
+        totalReminders = await Reminder.countDocuments({creator: userId})
+        // const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort('-createdAt').lean()
+        const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort({ createdAt: -1 }).lean().skip((currentPage - 1) * perPage).limit(perPage)
 
         const transformedReminders: transformedReminder[] = reminders.map(reminder => ({
             id: reminder._id.toString(),
@@ -61,7 +67,7 @@ export const getReminders = async (req: Request, res: Response<GetRemindersSucce
             updatedAt: reminder.updatedAt
         }))
 
-        res.status(200).json({success: true, message: 'Fetched Reminders successfully.', reminders: transformedReminders})
+        res.status(200).json({success: true, message: 'Fetched Reminders successfully.', reminders: transformedReminders, totalReminders})
     } catch (error: unknown) {
         const err = error as HttpError
         if(!err.statusCode) {

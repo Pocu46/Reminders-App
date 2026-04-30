@@ -63,6 +63,7 @@ export type GetRemindersSuccessResponse = {
     success: true;
     message: string;
     reminders: transformedReminder[];
+    totalReminders: number;
 }
 
 export type GetReminderSuccessResponse = {
