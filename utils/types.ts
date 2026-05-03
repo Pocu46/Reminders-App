@@ -1,4 +1,5 @@
 import mongoose, { Document } from 'mongoose';
+import { Request } from "express";
 
 export interface IReminder extends Document {
     title: string;
@@ -136,4 +137,8 @@ export type GetUserDataSuccessResponse = {
     success: boolean;
     message: string;
     user: TransformedUser
+}
+
+export type AuthenticatedRequest<P = Record<string, unknown>, ResBody = any, ReqBody = any, ReqQuery = Record<string, unknown>> = Request<P, ResBody, ReqBody, ReqQuery> & {
+    userId?: string;
 }

@@ -11,11 +11,6 @@ const userSchema = new Schema({
         type: String,
         required: [true, 'Password is required for DB.'],
     },
-    // image: {
-    //     imageName: {type: String},
-    //     imageLink: {type: String},
-    //     // required: [true, 'Image is required']
-    // }
     image: {
         type: {
             imageName: {type: String},

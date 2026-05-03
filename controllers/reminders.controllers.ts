@@ -1,5 +1,6 @@
-import {Request, Response, NextFunction} from "express";
+import {Response, NextFunction} from "express";
 import {
+    AuthenticatedRequest,
     CreateReminderBody,
     transformedReminder,
     CreateReminderSuccessResponse,
@@ -11,27 +12,25 @@ import {
     EditReminderErrorResponse,
     EditReminderValidationErrorResponse,
     DeleteReminderSuccessResponse,
-    DeleteReminderErrorResponse, reminderDB, HttpError
+    DeleteReminderErrorResponse,
+    reminderDB,
+    HttpError
 } from "../utils/types";
 import {validationResult} from "express-validator";
 import Reminder from "../models/reminder.model";
 
-const userId: string = '69b18a76eed1d10cfaa7a873'
-
-export const createReminder = async (req: Request<{userId: string}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
+export const createReminder = async (req: AuthenticatedRequest<{}, {}, CreateReminderBody>, res: Response<CreateReminderSuccessResponse | CreateReminderErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    // const userId = '69b18a76eed1d10cfaa7a873'
-    // const userId = req.params?.userId
     const { title, text } = req.body
 
     const reminder = new Reminder({
         title,
         text,
-        creator: userId
+        creator: req.userId
     })
     try {
         await reminder.save()
@@ -47,15 +46,22 @@ export const createReminder = async (req: Request<{userId: string}, {}, CreateRe
     }
 }
 
-export const getReminders = async (req: Request<{}, {}, {}, {page?: string}>, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
-    // const userId = '123'
+export const getReminders = async (req: AuthenticatedRequest<{}, {}, {}, {page?: string}>, res: Response<GetRemindersSuccessResponse>, next: NextFunction) => {
     const page: string | undefined = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page
     const currentPage: number = Number(page) || 1
     const perPage: number = 9
+    const userId = req.userId
     let totalReminders: number = 0
+
+    if (!userId) {
+        const err = new Error('Not authenticated!') as HttpError
+        err.statusCode = 401
+        err.success = false
+        return next(err)
+    }
+
     try {
         totalReminders = await Reminder.countDocuments({creator: userId})
-        // const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort('-createdAt').lean()
         const reminders: reminderDB[] = await Reminder.find({creator: userId}).sort({ createdAt: -1 }).lean().skip((currentPage - 1) * perPage).limit(perPage)
 
         const transformedReminders: transformedReminder[] = reminders.map(reminder => ({
@@ -78,18 +84,24 @@ export const getReminders = async (req: Request<{}, {}, {}, {page?: string}>, re
     }
 }
 
-export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<GetReminderSuccessResponse | GetReminderErrorResponse>, next: NextFunction) => {
-    // const userId = '123'
+export const getReminder = async (req: AuthenticatedRequest<{reminderId: string}, {}, {}>, res: Response<GetReminderSuccessResponse | GetReminderErrorResponse>, next: NextFunction) => {
+    const reminderId = req.params?.reminderId
+    const userId = req.userId
 
-    const reminderId= req.params?.reminderId
+    if (!userId) {
+        const err = new Error('Not authenticated!') as HttpError
+        err.statusCode = 401
+        err.success = false
+        return next(err)
+    }
 
-    if(!reminderId) {
+    if (!reminderId) {
         return res.status(400).json({success: false, message: 'Reminder ID required.'})
     }
 
     try {
         const existingReminder: reminderDB | null = await Reminder.findOne({_id: reminderId, creator: userId})
-        if(!existingReminder) {
+        if (!existingReminder) {
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
@@ -105,7 +117,7 @@ export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, re
         res.status(200).json({success: true, message: 'Reminder fetched', reminder: transformedReminder})
     } catch (error: unknown) {
         const err = error as HttpError
-        if(!err.statusCode) {
+        if (!err.statusCode) {
             err.statusCode = 500
             err.success = false
         }
@@ -113,17 +125,24 @@ export const getReminder = async (req: Request<{reminderId: string}, {}, {}>, re
     }
 }
 
-export const editReminder = async (req: Request<{reminderId: string}, {}, CreateReminderBody>, res: Response<EditReminderSuccessResponse | EditReminderErrorResponse | EditReminderValidationErrorResponse>, next: NextFunction) => {
+export const editReminder = async (req: AuthenticatedRequest<{reminderId: string}, {}, CreateReminderBody>, res: Response<EditReminderSuccessResponse | EditReminderErrorResponse | EditReminderValidationErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(422).json({message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
-    // const userId = '123'
-    const reminderId  = req.params.reminderId
+    const reminderId = req.params.reminderId
+    const userId = req.userId
     const { title, text } = req.body
 
-    if(!reminderId) {
+    if (!userId) {
+        const err = new Error('Not authenticated!') as HttpError
+        err.statusCode = 401
+        err.success = false
+        return next(err)
+    }
+
+    if (!reminderId) {
         return res.status(400).json({success: false, message: 'Reminder ID required.'})
     }
 
@@ -139,14 +158,14 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
             { returnDocument: 'after', runValidators: true }
         )
 
-        if(!reminder) {
+        if (!reminder) {
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
         res.status(200).json({success: true, message: 'Reminder was updated'})
     } catch (error: unknown) {
         const err = error as HttpError
-        if(!err.statusCode) {
+        if (!err.statusCode) {
             err.statusCode = 500
             err.success = false
         }
@@ -154,11 +173,18 @@ export const editReminder = async (req: Request<{reminderId: string}, {}, Create
     }
 }
 
-export const deleteReminder = async (req: Request<{reminderId: string}, {}, {}>, res: Response<DeleteReminderSuccessResponse | DeleteReminderErrorResponse>, next: NextFunction) => {
-    // const userId = '123'
-    const reminderId    = req.params?.reminderId
+export const deleteReminder = async (req: AuthenticatedRequest<{reminderId: string}, {}, {}>, res: Response<DeleteReminderSuccessResponse | DeleteReminderErrorResponse>, next: NextFunction) => {
+    const reminderId = req.params?.reminderId
+    const userId = req.userId
 
-    if(!reminderId) {
+    if (!userId) {
+        const err = new Error('Not authenticated!') as HttpError
+        err.statusCode = 401
+        err.success = false
+        return next(err)
+    }
+
+    if (!reminderId) {
         return res.status(400).json({success: false, message: 'Reminder ID required.'})
     }
 
@@ -172,7 +198,7 @@ export const deleteReminder = async (req: Request<{reminderId: string}, {}, {}>,
         res.status(200).json({success: true, message: 'Reminder was deleted'})
     } catch (error: unknown) {
         const err = error as HttpError
-        if(!err.statusCode) {
+        if (!err.statusCode) {
             err.statusCode = 500
             err.success = false
         }

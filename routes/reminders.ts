@@ -7,10 +7,11 @@ import {
     editReminder,
     deleteReminder
 } from '../controllers/reminders.controllers';
+import {isAuth} from "../middleware/isAuth";
 
 const router = express.Router()
 
-router.post('/', [
+router.post('/', isAuth, [
     body('title')
         .trim()
         .isString()
@@ -22,11 +23,11 @@ router.post('/', [
         .withMessage('Text should be at least 3 characters long')
 ], createReminder)
 
-router.get('/', getReminders)
+router.get('/', isAuth, getReminders)
 
-router.get('/:reminderId', getReminder)
+router.get('/:reminderId', isAuth, getReminder)
 
-router.put('/:reminderId', [
+router.put('/:reminderId', isAuth, [
         body('title')
             .trim()
             .isString()
@@ -38,6 +39,6 @@ router.put('/:reminderId', [
             .withMessage('Text should be at least 3 characters long')
     ], editReminder)
 
-router.delete('/:reminderId', deleteReminder)
+router.delete('/:reminderId', isAuth, deleteReminder)
 
 export default router;

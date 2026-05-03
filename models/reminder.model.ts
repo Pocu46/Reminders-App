@@ -11,7 +11,6 @@ const reminderSchema = new Schema<IReminder>({
         required: [true, 'Text is required']
     },
     creator: {
-        // type: String,
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: [true, 'Creator ID is required']

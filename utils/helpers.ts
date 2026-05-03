@@ -1,4 +1,6 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+
+export const SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production'
 
 export const hashPassword = async (password: string, saltRounds = 10) => {
     try {

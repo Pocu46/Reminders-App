@@ -2,6 +2,7 @@ import express, { Application, Request, Response, NextFunction  } from 'express'
 import dotenv from 'dotenv';
 import remindersRoutes from './routes/reminders';
 import userRoutes from './routes/users';
+import authRoutes from './routes/auth';
 import path from 'path';
 import {connectToDB} from "./utils/dbConnect";
 import {HttpError} from "./utils/types";
@@ -28,6 +29,7 @@ app.use((req: Request, res: Response, next: NextFunction) =>{
     next()
 })
 
+app.use(`${API_PREFIX}/auth`, authRoutes)
 app.use(`${API_PREFIX}/user`, userRoutes)
 app.use(`${API_PREFIX}/reminders`, remindersRoutes)
 
