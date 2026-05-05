@@ -1,0 +1,68 @@
+import express from 'express';
+import { body } from 'express-validator';
+import {login, registration} from "../controllers/auth.controllers";
+
+const router = express.Router()
+
+router.post('/registration', [
+    body('email')
+        .trim()
+        .toLowerCase()
+        .notEmpty()
+        .withMessage('Email is required.')
+        .isEmail()
+        .withMessage('Email format isn\'t correct.'),
+    body('password')
+        .trim()
+        .isString()
+        .withMessage('Password must be a string.')
+        .isLength({ min: 8 })
+        .withMessage('Password should be at least 8 characters long.')
+        .matches(/[a-z]/)
+        .withMessage('Password should contain lowercase letters.')
+        .matches(/[A-Z]/)
+        .withMessage('Password should contain uppercase letters.')
+        .matches(/\d/)
+        .withMessage('Password should contain digits.')
+        .matches(/^[a-zA-Z0-9]+$/)
+        .withMessage('Password should contain only letters and digits.'),
+    body('confirmPassword')
+        .trim()
+        .isString()
+        .withMessage('Confirm Password must be a string.')
+        .isLength({ min: 8 })
+        .withMessage('Confirm Password should be at least 8 characters long.')
+        .matches(/[a-z]/)
+        .withMessage('Confirm Password should contain lowercase letters.')
+        .matches(/[A-Z]/)
+        .withMessage('Confirm Password should contain uppercase letters.')
+        .matches(/\d/)
+        .withMessage('Confirm Password should contain digits.')
+        .matches(/^[a-zA-Z0-9]+$/)
+        .withMessage('Confirm Password should contain only letters and digits.')
+], registration)
+router.post('/login', [
+    body('email')
+        .trim()
+        .toLowerCase()
+        .notEmpty()
+        .withMessage('Email is required.')
+        .isEmail()
+        .withMessage('Email format isn\'t correct.'),
+    body('password')
+        .trim()
+        .isString()
+        .withMessage('Password must be a string.')
+        .isLength({ min: 8 })
+        .withMessage('Password should be at least 8 characters long.')
+        .matches(/[a-z]/)
+        .withMessage('Password should contain lowercase letters.')
+        .matches(/[A-Z]/)
+        .withMessage('Password should contain uppercase letters.')
+        .matches(/\d/)
+        .withMessage('Password should contain digits.')
+        .matches(/^[a-zA-Z0-9]+$/)
+        .withMessage('Password should contain only letters and digits.')
+], login)
+
+export default router;
