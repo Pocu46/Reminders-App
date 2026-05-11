@@ -42,7 +42,7 @@ export const registration = async (req: Request<{}, {}, CreateUser>, res: Respon
 
         await user.save()
 
-        res.status(201).json({success: true, message: 'New User created'})
+        res.status(201).json({success: true, message: 'New User created!'})
     } catch (error: unknown) {
         const err = error as HttpError
         if(!err.statusCode) {
