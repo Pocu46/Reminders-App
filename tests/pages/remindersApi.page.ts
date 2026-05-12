@@ -16,11 +16,20 @@ type UserData = {
     heading: string;
     email: string;
     password: string | number;
-    confirmPassword: string | number;
+    confirmPassword?: string | number;
     statusCode: number;
     successStatus: boolean;
     messageText: string;
 }
+
+// type userLoginData = {
+//     heading: string;
+//     email: string;
+//     password: string | number;
+//     statusCode: number;
+//     successStatus: boolean;
+//     messageText: string;
+// }
 
 export class RemindersApiPage {
     readonly request: APIRequestContext
@@ -28,6 +37,7 @@ export class RemindersApiPage {
     readonly testEmail: string = `test_${test.info().project.name}_${Date.now()}@example.com`
     readonly testPassword: string = 'Text1909892'
     readonly userData: UserData[]
+    readonly userLoginData: UserData[]
 
     constructor(request: APIRequestContext) {
         this.request = request
@@ -213,6 +223,56 @@ export class RemindersApiPage {
                 messageText: 'Password and Confirm Password fields should match.'
             }
         ]
+        this.userLoginData = [
+            {
+                heading: 'valid data',
+                email: this.testEmail,
+                password: this.testPassword,
+                statusCode: 200,
+                successStatus: true,
+                messageText: 'The User is logged!'
+            },
+            {
+                heading: 'empty Email field',
+                email: '',
+                password: this.testPassword,
+                statusCode: 422,
+                successStatus: false,
+                messageText: 'Validation failed, entered data is incorrect.'
+            },
+            {
+                heading: 'an Email without @ symbol',
+                email: `test_${test.info().project.name}_${Date.now()}example.com`,
+                password: this.testPassword,
+                statusCode: 422,
+                successStatus: false,
+                messageText: 'Validation failed, entered data is incorrect.'
+            },
+            {
+                heading: 'Email that isn\'t registered',
+                email: 'nonexistent@example.com',
+                password: this.testPassword,
+                statusCode: 404,
+                successStatus: false,
+                messageText: 'User doesn\'t exists!'
+            },
+            {
+                heading: 'an empty Password field',
+                email: this.testEmail,
+                password: '',
+                statusCode: 422,
+                successStatus: false,
+                messageText: 'Validation failed, entered data is incorrect.'
+            },
+            {
+                heading: 'not existing Password',
+                email: this.testEmail,
+                password: 'nonexistentPassword123',
+                statusCode: 401,
+                successStatus: false,
+                messageText: 'Passwords don\'t match!'
+            },
+        ]
     }
 
     async userRegistration() {
@@ -234,9 +294,9 @@ export class RemindersApiPage {
         
                 const responseBody: UserRegistrationResponse = await response.json()
         
-                expect(responseBody).toHaveProperty('success');
-                expect(responseBody.success).toBe(successStatus);
-                expect(responseBody).toHaveProperty('message');
+                expect(responseBody).toHaveProperty('success')
+                expect(responseBody.success).toBe(successStatus)
+                expect(responseBody).toHaveProperty('message')
                 expect(responseBody.message).toBe(messageText)
             })
         }
@@ -256,6 +316,38 @@ export class RemindersApiPage {
     }
 
     async userLogin() {
+        for (const userData of this.userLoginData) {
+            const {heading, email, password, statusCode, successStatus, messageText} = userData
+
+            await test.step(`Verify User Login with ${heading}`, async () => {
+                const response = await this.request.post(`${this.apiPrefix}auth/login`, {
+                    data: {
+                        email,
+                        password
+                    },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+
+                expect(response.status()).toBe(statusCode)
+
+                const responseBody: UserLoginResponse = await response.json()
+
+                expect(responseBody).toHaveProperty('success')
+                expect(responseBody.success).toBe(successStatus)
+                expect(responseBody).toHaveProperty('message')
+                expect(responseBody.message).toBe(messageText)
+
+                if (successStatus) {
+                    expect(responseBody).toHaveProperty('userId')
+                    expect(responseBody).toHaveProperty('token')
+                }
+            })
+        }
+    }
+
+    async userAuth() {
         const response = await this.request.post(`${this.apiPrefix}auth/login`, {
             data: {
                 email: this.testEmail,
@@ -264,9 +356,9 @@ export class RemindersApiPage {
             headers: {
                 'Content-Type': 'application/json'
             }
-        }) 
+        })
 
-        expect(response.status()).toBe(200)
+        const responseBody: UserLoginResponse = await response.json()
     }
 
     async clearUser() {
