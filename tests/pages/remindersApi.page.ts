@@ -432,4 +432,50 @@ export class RemindersApiPage {
             }
         })
     }
+
+    async userDelete(userId: string, token: string) {
+        const response = await this.request.delete(`${this.apiPrefix}user/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        expect(response.status()).toBe(200)
+        const responseBody = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(true)
+        expect(responseBody).toHaveProperty('message')
+        expect(responseBody.message).toBe('User was deleted.')
+    }
+
+    async userDeleteInvalidUserId(token: string) {
+        const invalidUserId = 'invalid-user-id'
+        const response = await this.request.delete(`${this.apiPrefix}user/${invalidUserId}`, {
+            headers: {  
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        expect(response.status()).toBe(500)
+        const responseBody = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
+    }
+
+    async userDeleteInvalidToken(userId: string) {
+        const invalidToken = 'invalid-token'
+        const response = await this.request.delete(`${this.apiPrefix}user/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${invalidToken}`
+            }
+        })
+
+        expect(response.status()).toBe(500)
+        const responseBody = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
+    }
 }

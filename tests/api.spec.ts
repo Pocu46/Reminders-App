@@ -18,7 +18,7 @@ test.describe('API Tests', () => {
         const {userId, token} = await api.userAuth()
         await api.clearUser(userId, token)
     })
-    
+
     test('Get User data tests', async ({ request }: { request: APIRequestContext }) => {
         const api = new RemindersApiPage(request)
 
@@ -42,6 +42,28 @@ test.describe('API Tests', () => {
             const {userId} = await api.userAuth()
             await api.getUserDataInvalidToken(userId)
             await api.clearUser(userId, 'invalid-token')
+        })
+    })
+
+    test('Delete User tests', async ({ request }: { request: APIRequestContext }) => {
+        const api = new RemindersApiPage(request)
+
+        await test.step('Delete User with valid credentials', async () => {
+            await api.userCreate()
+            const {userId, token} = await api.userAuth()
+            await api.userDelete(userId, token)
+        })
+
+        await test.step('Delete User with invalid User ID', async () => {
+            await api.userCreate()
+            const {token} = await api.userAuth()
+            await api.userDeleteInvalidUserId(token)
+        })
+
+        await test.step('Delete User with invalid token', async () => {
+            await api.userCreate()
+            const {userId} = await api.userAuth()
+            await api.userDeleteInvalidToken(userId)
         })
     })
 })
