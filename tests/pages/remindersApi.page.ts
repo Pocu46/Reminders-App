@@ -22,14 +22,20 @@ type UserData = {
     messageText: string;
 }
 
-// type userLoginData = {
-//     heading: string;
-//     email: string;
-//     password: string | number;
-//     statusCode: number;
-//     successStatus: boolean;
-//     messageText: string;
-// }
+type GetUserDataResponse = {
+    success: boolean;
+    message: string;
+    user: {
+        id: string;
+        email: string;
+        image: {
+            imageName: string;
+            imageLink: string;
+        }
+    createdAt: string;
+    updatedAt: string;
+    };
+};
 
 export class RemindersApiPage {
     readonly request: APIRequestContext
@@ -358,24 +364,68 @@ export class RemindersApiPage {
             }
         })
 
-        const responseBody: UserLoginResponse = await response.json()
+        const {userId, token}: UserLoginResponse = await response.json()
+
+        return {userId, token}
     }
 
-    async clearUser() {
-        const response = await this.request.post(`${this.apiPrefix}auth/login`, {
-            data: {
-                email: this.testEmail,
-                password: this.testPassword
-            },
+    async getUserData(userId: string, token: string) {
+        const response = await this.request.get(`${this.apiPrefix}user/${userId}`, {
             headers: {
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`
             }
-        }) 
+        })
 
-        const responseBody: UserLoginResponse = await response.json()
-        const userId = responseBody.userId
-        const token = responseBody.token
+        expect(response.status()).toBe(200)
 
+        const responseBody: GetUserDataResponse = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(true)
+        expect(responseBody).toHaveProperty('message')
+        expect(responseBody.message).toBe('User Data fetched.')
+        expect(responseBody.user).toHaveProperty('email')
+        expect(responseBody.user.email).toBe(this.testEmail)
+        expect(responseBody.user).toHaveProperty('id')
+        expect(responseBody.user).toHaveProperty('image')
+        expect(responseBody.user.image).toHaveProperty('imageName')
+        expect(responseBody.user.image.imageName).toMatch(/default-avatar\.png/);
+        expect(responseBody.user.image).toHaveProperty('imageLink')
+        expect(responseBody.user).toHaveProperty('createdAt')
+        expect(responseBody.user).toHaveProperty('updatedAt')
+    }
+
+    async getUserDataInvalidUserId(token: string) {
+        const invalidUserId = 'invalid-user-id'
+        const response = await this.request.get(`${this.apiPrefix}user/${invalidUserId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        expect(response.status()).toBe(500) 
+        const responseBody: GetUserDataResponse = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
+    }
+
+    async getUserDataInvalidToken(userId: string) {
+        const invalidToken = 'invalid-token'
+        const response = await this.request.get(`${this.apiPrefix}user/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${invalidToken}`
+            }
+        })
+
+        expect(response.status()).toBe(500) 
+        const responseBody: GetUserDataResponse = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
+    }
+
+    async clearUser(userId: string, token: string) {
         await this.request.delete(`${this.apiPrefix}user/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
