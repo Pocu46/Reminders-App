@@ -37,10 +37,10 @@ type GetUserDataResponse = {
     };
 };
 
-export class RemindersApiPage {
+export class UsersApiPage {
     readonly request: APIRequestContext
     readonly apiPrefix: string = 'api/v1/'
-    readonly testEmail: string = `test_${test.info().project.name}_${Date.now()}@example.com`
+    readonly testEmail: string = `test_${Date.now()}_${crypto.randomUUID()}@example.com`
     readonly testPassword: string = 'Text1909892'
     readonly userData: UserData[]
     readonly userLoginData: UserData[]
@@ -300,9 +300,7 @@ export class RemindersApiPage {
         
                 const responseBody: UserRegistrationResponse = await response.json()
         
-                expect(responseBody).toHaveProperty('success')
                 expect(responseBody.success).toBe(successStatus)
-                expect(responseBody).toHaveProperty('message')
                 expect(responseBody.message).toBe(messageText)
             })
         }
@@ -340,9 +338,7 @@ export class RemindersApiPage {
 
                 const responseBody: UserLoginResponse = await response.json()
 
-                expect(responseBody).toHaveProperty('success')
                 expect(responseBody.success).toBe(successStatus)
-                expect(responseBody).toHaveProperty('message')
                 expect(responseBody.message).toBe(messageText)
 
                 if (successStatus) {
@@ -380,15 +376,10 @@ export class RemindersApiPage {
 
         const responseBody: GetUserDataResponse = await response.json()
 
-        expect(responseBody).toHaveProperty('success')
         expect(responseBody.success).toBe(true)
-        expect(responseBody).toHaveProperty('message')
         expect(responseBody.message).toBe('User Data fetched.')
-        expect(responseBody.user).toHaveProperty('email')
         expect(responseBody.user.email).toBe(this.testEmail)
         expect(responseBody.user).toHaveProperty('id')
-        expect(responseBody.user).toHaveProperty('image')
-        expect(responseBody.user.image).toHaveProperty('imageName')
         expect(responseBody.user.image.imageName).toMatch(/default-avatar\.png/);
         expect(responseBody.user.image).toHaveProperty('imageLink')
         expect(responseBody.user).toHaveProperty('createdAt')
@@ -425,12 +416,32 @@ export class RemindersApiPage {
         expect(responseBody.success).toBe(false)
     }
 
+    async updateUserAvatarSuccess(userId: string, token: string, imagePath: string) {
+        const response = await this.request.post(`${this.apiPrefix}user/${userId}/avatar`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            data: {
+                image: imagePath
+            }
+        })
+
+        expect(response.status()).toBe(200)
+
+        const responseBody = await response.json()
+
+        expect(responseBody.success).toBe(true)
+        expect(responseBody.message).toBe('User avatar updated.')
+    }
+
     async clearUser(userId: string, token: string) {
-        await this.request.delete(`${this.apiPrefix}user/${userId}`, {
+        const response = await this.request.delete(`${this.apiPrefix}user/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
+
+        expect(response.status()).toBe(200)
     }
 
     async userDelete(userId: string, token: string) {

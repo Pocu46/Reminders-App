@@ -1,18 +1,23 @@
 import { test, APIRequestContext } from '@playwright/test';
-import { RemindersApiPage } from './pages/remindersApi.page';
+import { UsersApiPage } from './pages/usersApi.page';
 
-test.describe('API Tests', () => {
+let api: UsersApiPage
+
+test.beforeEach(async ({ request }: { request: APIRequestContext }) => {
+    api = new UsersApiPage(request)
+})
+
+test.afterEach(async ({ request }: { request: APIRequestContext }) => {
+    const {userId, token} = await api.userAuth()
+    await api.clearUser(userId, token)
+})
+
+test.describe('User API Tests', () => {
     test('User Registration tests', async ({ request }: { request: APIRequestContext }) => {
-        const api = new RemindersApiPage(request)
-
         await api.userRegistration()
-        const {userId, token} = await api.userAuth()
-        await api.clearUser(userId, token)
     })
 
     test('User Login tests', async ({ request }: { request: APIRequestContext }) => {
-        const api = new RemindersApiPage(request)
-
         await api.userCreate()
         await api.userLogin()
         const {userId, token} = await api.userAuth()
@@ -20,8 +25,6 @@ test.describe('API Tests', () => {
     })
 
     test('Get User data tests', async ({ request }: { request: APIRequestContext }) => {
-        const api = new RemindersApiPage(request)
-
         await test.step('Get User data with valid credentials', async () => {
             await api.userCreate()
             const {userId, token} = await api.userAuth()
@@ -45,9 +48,13 @@ test.describe('API Tests', () => {
         })
     })
 
-    test('Delete User tests', async ({ request }: { request: APIRequestContext }) => {
-        const api = new RemindersApiPage(request)
+    test('Update User avatar tests', async ({ request }: { request: APIRequestContext }) => {
+        await test.step('Update User avatar with valid credentials', async () => {
 
+        })
+    })
+
+    test('Delete User tests', async ({ request }: { request: APIRequestContext }) => {
         await test.step('Delete User with valid credentials', async () => {
             await api.userCreate()
             const {userId, token} = await api.userAuth()
