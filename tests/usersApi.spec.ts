@@ -3,8 +3,12 @@ import { UsersApiPage } from './pages/usersApi.page';
 
 let api: UsersApiPage
 
-test.beforeEach(async ({ request }: { request: APIRequestContext }) => {
+test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     api = new UsersApiPage(request)
+    
+    if (testInfo.title === 'User Registration tests') return
+
+    await api.userCreate()
 })
 
 test.afterEach(async ({ request }: { request: APIRequestContext }) => {
@@ -17,11 +21,6 @@ test.afterEach(async ({ request }: { request: APIRequestContext }) => {
 })
 
 test.describe('User API Tests', () => {
-    test.beforeEach(async ({}, testInfo) => {
-        if (testInfo.title === 'User Registration tests') return
-
-        await api.userCreate()
-    })
     test('User Registration tests', async ({ request }: { request: APIRequestContext }) => {
         await api.userRegistration()
     })
