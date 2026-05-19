@@ -328,7 +328,9 @@ export class UsersApiPage {
     }
 
     async userLogin() {
-        for (const userData of this.userLoginData) {
+        const [validCase, ...negativeCases] = this.userLoginData
+
+        const runLoginStep = async (userData: UserData) => {
             const {heading, email, password, statusCode, successStatus, messageText} = userData
 
             await test.step(`Verify User Login with ${heading}`, async () => {
@@ -355,6 +357,9 @@ export class UsersApiPage {
                 }
             })
         }
+
+        await runLoginStep(validCase)
+        await Promise.all(negativeCases.map(userData => runLoginStep(userData)))
     }
 
     async userAuth() {
