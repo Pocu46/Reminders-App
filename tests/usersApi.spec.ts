@@ -16,9 +16,14 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
     token = auth.token
 })
 
-test.afterEach(async ({ request }: { request: APIRequestContext }) => {
+test.afterEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     try {
-        await api.clearUser(userId, token)
+        if (testInfo.title === 'User Registration tests') {
+            const auth = await api.userAuth()
+            await api.clearUser(auth.userId, auth.token)
+        } else if (userId && token) {
+            await api.clearUser(userId, token)
+        }
     } catch (e) {
         console.error('Error during cleanup:', e)
     }
