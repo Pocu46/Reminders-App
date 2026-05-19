@@ -282,7 +282,9 @@ export class UsersApiPage {
     }
 
     async userRegistration() {
-        for (const userData of this.userData) {
+        const [validCase, duplicateCase, ...negativeCases] = this.userData
+
+        const runRegistrationStep = async (userData: UserData) => {
             const {heading, email, password, confirmPassword, statusCode, successStatus, messageText} = userData
 
             await test.step(`Verify User Registration with ${heading}`, async () => {
@@ -296,14 +298,20 @@ export class UsersApiPage {
                         'Content-Type': 'application/json'
                     }
                 })
+
                 expect(response.status()).toBe(statusCode)
-        
+
                 const responseBody: UserRegistrationResponse = await response.json()
-        
+
                 expect(responseBody.success).toBe(successStatus)
                 expect(responseBody.message).toBe(messageText)
             })
         }
+
+        await runRegistrationStep(validCase)
+        await runRegistrationStep(duplicateCase)
+
+        await Promise.all(negativeCases.map(userData => runRegistrationStep(userData)))
     }
 
     async userCreate() {
