@@ -29,7 +29,7 @@ export const registration = async (req: Request<{}, {}, CreateUser>, res: Respon
             email,
             password: hashedPassword,
             image: {
-                imageName: `${new Date().toISOString()}-${avatarName.replace(/:/g, '-')}`,
+                imageName: avatarName,
                 imageLink: avatarPath
             }
         })

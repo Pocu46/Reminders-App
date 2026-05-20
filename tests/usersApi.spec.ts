@@ -29,6 +29,8 @@ test.afterEach(async ({ request }: { request: APIRequestContext }, testInfo) => 
     }
 })
 
+test.describe.configure({ mode: 'serial' })
+
 test.describe('User API Tests', () => {
     test('User Registration tests', async ({ request }: { request: APIRequestContext }) => {
         await api.userRegistration()
@@ -66,7 +68,7 @@ test.describe('User API Tests', () => {
         })
 
         await test.step('Update User avatar without image file adding', async () => {
-            await api.updateUserAvatarWithoutImage(token)
+            await api.updateUserAvatarWithoutImage(userId, token)
         })
     })
 

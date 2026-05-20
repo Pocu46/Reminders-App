@@ -112,6 +112,7 @@ export const userImageUpdate = async(req: Request<{userId: string}>, res: Respon
 
         const user: IUser | null = await User.findById(userId)
         if (!user) {
+            await deleteImage(imageName)
             return res.status(404).json({success: false, message: 'User doesn\'t exists!'})
         }
 
@@ -124,11 +125,15 @@ export const userImageUpdate = async(req: Request<{userId: string}>, res: Respon
         )
 
         if(!updatedUser) {
+            await deleteImage(imageName)
             return res.status(404).json({success: false, message: 'User doesn\'t found for update.'})
         }
 
         res.status(200).json({success: true, message: 'User avatar was updated.'})
     } catch (error: unknown) {
+        if (req.file) {
+            await deleteImage(req.file.filename)
+        }
         const err = error as HttpError
         if(!err.statusCode) {
             err.statusCode = 500

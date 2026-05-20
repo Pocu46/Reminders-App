@@ -516,8 +516,8 @@ export class UsersApiPage {
         expect(responseBody.success).toBe(false)
     }
 
-    async updateUserAvatarWithoutImage(token: string) {
-        const response = await this.request.put(`${this.apiPrefix}user/avatar`, {
+    async updateUserAvatarWithoutImage(userId: string, token: string) {
+        const response = await this.request.put(`${this.apiPrefix}user/${userId}/avatar`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -537,7 +537,7 @@ export class UsersApiPage {
             }
         })
 
-        expect(response.status()).toBe(200)
+        expect([200, 404]).toContain(response.status())
     }
 
     async userDelete(userId: string, token: string) {

@@ -41,15 +41,17 @@ export const upload: multer.Multer = multer({
 })
 
 export const deleteImage = async (fileName: string): Promise<void> => {
+    if (!fileName) return
+    if (fileName.includes('default-avatar.png')) return
+
+    const fullPath = path.join(uploadDir, fileName)
+
     try {
-        if (!fileName) return
-        if (fileName === 'default-avatar.png') return
-
-        const fullPath = path.join(uploadDir, fileName)
-
-        await fs.promises.access(fullPath)
         await fs.promises.unlink(fullPath)
-    } catch (error) {
-        console.error('Error in deleteImage:', error)
+    } catch (error: unknown) {
+        const err = error as NodeJS.ErrnoException
+        if (err.code === 'ENOENT') return
+        console.error('Error in deleteImage:', err)
+        throw err
     }
 }

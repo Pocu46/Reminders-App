@@ -1,0 +1,48 @@
+﻿
+Running 15 tests using 3 workers
+
+[1A[2K[1/15] [webkit] тА║ tests\usersApi.spec.ts:35:9 тА║ User API Tests тА║ User Registration tests
+[1A[2K[2/15] [firefox] тА║ tests\usersApi.spec.ts:35:9 тА║ User API Tests тА║ User Registration tests
+[1A[2K[3/15] [chromium] тА║ tests\usersApi.spec.ts:35:9 тА║ User API Tests тА║ User Registration tests
+[1A[2K[4/15] [firefox] тА║ tests\usersApi.spec.ts:39:9 тА║ User API Tests тА║ User Login tests
+[1A[2K[5/15] [webkit] тА║ tests\usersApi.spec.ts:39:9 тА║ User API Tests тА║ User Login tests
+[1A[2K[6/15] [chromium] тА║ tests\usersApi.spec.ts:39:9 тА║ User API Tests тА║ User Login tests
+[1A[2K[7/15] [firefox] тА║ tests\usersApi.spec.ts:43:9 тА║ User API Tests тА║ Get User data tests
+[1A[2K[8/15] [webkit] тА║ tests\usersApi.spec.ts:43:9 тА║ User API Tests тА║ Get User data tests
+[1A[2K[9/15] [chromium] тА║ tests\usersApi.spec.ts:43:9 тА║ User API Tests тА║ Get User data tests
+[1A[2K[10/15] [firefox] тА║ tests\usersApi.spec.ts:57:9 тА║ User API Tests тА║ Update User avatar tests
+[1A[2K[11/15] [webkit] тА║ tests\usersApi.spec.ts:57:9 тА║ User API Tests тА║ Update User avatar tests
+[1A[2K[12/15] [chromium] тА║ tests\usersApi.spec.ts:57:9 тА║ User API Tests тА║ Update User avatar tests
+[1A[2K[13/15] [firefox] тА║ tests\usersApi.spec.ts:75:9 тА║ User API Tests тА║ Delete User tests
+[1A[2K[14/15] [webkit] тА║ tests\usersApi.spec.ts:75:9 тА║ User API Tests тА║ Delete User tests
+[1A[2K[15/15] [chromium] тА║ tests\usersApi.spec.ts:75:9 тА║ User API Tests тА║ Delete User tests
+[1A[2K  15 passed (13.5s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m
+
+Name                                         Length LastWriteTime      
+----                                         ------ -------------      
+2026-05-20T12-18-15-493Z-valentino-rossi.jpg 356714 20.05.2026 15:18:15
+2026-05-20T12-18-15-497Z-valentino-rossi.jpg 356714 20.05.2026 15:18:15
+2026-05-20T12-18-16-542Z-valentino-rossi.jpg 356714 20.05.2026 15:18:16
+2026-05-20T12-22-01-633Z-valentino-rossi.jpg 356714 20.05.2026 15:22:01
+2026-05-20T12-22-02-253Z-valentino-rossi.jpg 356714 20.05.2026 15:22:02
+2026-05-20T12-22-02-482Z-valentino-rossi.jpg 356714 20.05.2026 15:22:02
+2026-05-20T12-23-04-965Z-valentino-rossi.jpg 356714 20.05.2026 15:23:04
+2026-05-20T12-23-04-974Z-valentino-rossi.jpg 356714 20.05.2026 15:23:04
+2026-05-20T12-23-06-659Z-valentino-rossi.jpg 356714 20.05.2026 15:23:06
+2026-05-20T12-24-12-276Z-valentino-rossi.jpg 356714 20.05.2026 15:24:12
+2026-05-20T12-24-12-291Z-valentino-rossi.jpg 356714 20.05.2026 15:24:12
+2026-05-20T12-24-12-346Z-valentino-rossi.jpg 356714 20.05.2026 15:24:12
+2026-05-20T12-42-36-602Z-valentino-rossi.jpg 356714 20.05.2026 15:42:36
+2026-05-20T12-42-38-114Z-valentino-rossi.jpg 356714 20.05.2026 15:42:38
+2026-05-20T12-42-38-231Z-valentino-rossi.jpg 356714 20.05.2026 15:42:38
+2026-05-20T12-43-14-270Z-valentino-rossi.jpg 356714 20.05.2026 15:43:14
+2026-05-20T12-43-14-283Z-valentino-rossi.jpg 356714 20.05.2026 15:43:14
+2026-05-20T12-43-15-794Z-valentino-rossi.jpg 356714 20.05.2026 15:43:15
+default-avatar.png                            48613 05.05.2026 14:23:33
+
+
