@@ -127,7 +127,7 @@ export const userImageUpdate = async(req: Request<{userId: string}>, res: Respon
             return res.status(404).json({success: false, message: 'User doesn\'t found for update.'})
         }
 
-        res.status(200).json({success: true, message: 'User was updated'})
+        res.status(200).json({success: true, message: 'User avatar was updated.'})
     } catch (error: unknown) {
         const err = error as HttpError
         if(!err.statusCode) {

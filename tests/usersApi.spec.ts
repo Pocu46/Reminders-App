@@ -54,7 +54,19 @@ test.describe('User API Tests', () => {
 
     test('Update User avatar tests', async ({ request }: { request: APIRequestContext }) => {
         await test.step('Update User avatar with valid credentials', async () => {
+            await api.updateUserAvatarSuccess(userId, token)
+        })
 
+        await test.step('Update User avatar with invalid User ID', async () => {
+            await api.updateUserAvatarInvalidUserId(token)
+        })
+
+        await test.step('Update User avatar with invalid token', async () => {
+            await api.updateUserAvatarInvalidToken(userId)
+        })
+
+        await test.step('Update User avatar without image file adding', async () => {
+            await api.updateUserAvatarWithoutImage(token)
         })
     })
 

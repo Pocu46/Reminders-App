@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import test, { APIRequestContext, expect } from '@playwright/test';
 
 type UserRegistrationResponse = {
@@ -429,13 +431,20 @@ export class UsersApiPage {
         expect(responseBody.success).toBe(false)
     }
 
-    async updateUserAvatarSuccess(userId: string, token: string, imagePath: string) {
-        const response = await this.request.post(`${this.apiPrefix}user/${userId}/avatar`, {
+    async updateUserAvatarSuccess(userId: string, token: string) {
+        const imagePath = path.resolve(process.cwd(), 'tests', 'fixtures', 'valentino-rossi.jpg')
+        const imageBody = await fs.promises.readFile(imagePath)
+
+        const response = await this.request.put(`${this.apiPrefix}user/${userId}/avatar`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
-            data: {
-                image: imagePath
+            multipart: {
+                image: {
+                    name: 'valentino-rossi.jpg',
+                    mimeType: 'image/jpeg',
+                    buffer: imageBody
+                }
             }
         })
 
@@ -444,7 +453,81 @@ export class UsersApiPage {
         const responseBody = await response.json()
 
         expect(responseBody.success).toBe(true)
-        expect(responseBody.message).toBe('User avatar updated.')
+        expect(responseBody.message).toBe('User avatar was updated.')
+
+        const userData = await this.request.get(`${this.apiPrefix}user/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        const userDataBody: GetUserDataResponse = await userData.json()
+
+        expect(userDataBody.user.image.imageName).toMatch(/valentino-rossi\.jpg/)
+    }
+
+    async updateUserAvatarInvalidUserId(token: string) {
+        const invalidUserId = 'invalid-user-id'
+        const imagePath = path.resolve(process.cwd(), 'tests', 'fixtures', 'valentino-rossi.jpg')
+        const imageBody = await fs.promises.readFile(imagePath)
+
+        const response = await this.request.put(`${this.apiPrefix}user/${invalidUserId}/avatar`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            multipart: {
+                image: {
+                    name: 'valentino-rossi.jpg',
+                    mimeType: 'image/jpeg',
+                    buffer: imageBody
+                }
+            }
+        })
+
+        expect(response.status()).toBe(500)
+        const responseBody = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
+    }
+
+    async updateUserAvatarInvalidToken(userId: string) {
+        const invalidToken = 'invalid-token'
+        const imagePath = path.resolve(process.cwd(), 'tests', 'fixtures', 'valentino-rossi.jpg')
+        const imageBody = await fs.promises.readFile(imagePath)
+
+        const response = await this.request.put(`${this.apiPrefix}user/${userId}/avatar`, {
+            headers: {
+                'Authorization': `Bearer ${invalidToken}`
+            },
+            multipart: {
+                image: {
+                    name: 'valentino-rossi.jpg',
+                    mimeType: 'image/jpeg',
+                    buffer: imageBody
+                }
+            }
+        })
+
+        expect(response.status()).toBe(500)
+        const responseBody = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
+    }
+
+    async updateUserAvatarWithoutImage(token: string) {
+        const response = await this.request.put(`${this.apiPrefix}user/avatar`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        expect(response.status()).toBe(422)
+        const responseBody = await response.json()
+
+        expect(responseBody).toHaveProperty('success')
+        expect(responseBody.success).toBe(false)
     }
 
     async clearUser(userId: string, token: string) {
