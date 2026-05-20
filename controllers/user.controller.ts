@@ -55,7 +55,7 @@ export const userUpdate = async(req: Request<{userId: string}, {}, CreateUser>, 
     const { email, password, confirmPassword } = req.body
 
     if(password !== confirmPassword) {
-        return res.status(401).json({success: false, message: 'Passwords don\'t match!'})
+        return res.status(401).json({success: false, message: 'Password and Confirm Password fields should match.'})
     }
 
     try {
@@ -81,7 +81,7 @@ export const userUpdate = async(req: Request<{userId: string}, {}, CreateUser>, 
             return res.status(404).json({success: false, message: 'User doesn\'t found for update.'})
         }
 
-        res.status(200).json({success: true, message: 'User was updated'})
+        res.status(200).json({success: true, message: 'User was updated.'})
     } catch (error: unknown) {
         const err = error as HttpError
         if(!err.statusCode) {

@@ -16,7 +16,7 @@ export const registration = async (req: Request<{}, {}, CreateUser>, res: Respon
     const { email, password, confirmPassword } = req.body
 
     if(password !== confirmPassword) {
-        return res.status(400).json({success: false, message: 'Password and Confirm Password fields should match.'})
+        return res.status(401).json({success: false, message: 'Password and Confirm Password fields should match.'})
     }
 
     const avatarPath: string = path.join(__dirname, '../images/default-avatar.png')

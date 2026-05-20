@@ -29,18 +29,16 @@ test.afterEach(async ({ request }: { request: APIRequestContext }, testInfo) => 
     }
 })
 
-test.describe.configure({ mode: 'serial' })
-
 test.describe('User API Tests', () => {
-    test('User Registration tests', async ({ request }: { request: APIRequestContext }) => {
+    test('User Registration tests', async () => {
         await api.userRegistration()
     })
 
-    test('User Login tests', async ({ request }: { request: APIRequestContext }) => {
+    test('User Login tests', async () => {
         await api.userLogin()
     })
 
-    test('Get User data tests', async ({ request }: { request: APIRequestContext }) => {
+    test('Get User data tests', async () => {
         await test.step('Get User data with valid credentials', async () => {
             await api.getUserData(userId, token)
         })
@@ -54,7 +52,15 @@ test.describe('User API Tests', () => {
         })
     })
 
-    test('Update User avatar tests', async ({ request }: { request: APIRequestContext }) => {
+    test('Update User data tests', async () => {
+        await test.step('Update User data with valid credentials', async () => {
+            await api.userUpdate(userId, token)
+        })
+
+        await api.userUpdateInvalidCases(userId, token)
+    })
+
+    test('Update User avatar tests', async () => {
         await test.step('Update User avatar with valid credentials', async () => {
             await api.updateUserAvatarSuccess(userId, token)
         })
@@ -72,7 +78,7 @@ test.describe('User API Tests', () => {
         })
     })
 
-    test('Delete User tests', async ({ request }: { request: APIRequestContext }) => {
+    test('Delete User tests', async () => {
         await test.step('Delete User with valid credentials', async () => {
             await api.userDelete(userId, token)
         })

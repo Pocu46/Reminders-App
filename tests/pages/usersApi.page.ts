@@ -226,7 +226,7 @@ export class UsersApiPage {
                 email: this.testEmail,
                 password: this.testPassword,
                 confirmPassword: 'Different1234',
-                statusCode: 400,
+                statusCode: 401,
                 successStatus: false,
                 messageText: 'Password and Confirm Password fields should match.'
             }
@@ -429,6 +429,61 @@ export class UsersApiPage {
 
         expect(responseBody).toHaveProperty('success')
         expect(responseBody.success).toBe(false)
+    }
+
+    async userUpdate(userId: string, token: string) {
+        const newEmail = `updated_${this.testEmail}`
+        const newPassword = `Updated${this.testPassword}123`
+
+        const response = await this.request.put(`${this.apiPrefix}user/${userId}`, {
+            data: {
+                email: newEmail,
+                password: newPassword,
+                confirmPassword: newPassword
+            },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        expect(response.status()).toBe(200)
+
+        const responseBody = await response.json()
+
+        expect(responseBody.success).toBe(true)
+        expect(responseBody.message).toBe('User was updated.')
+    }
+
+    async userUpdateInvalidCases(userId: string, token: string) {
+        const [validCase, duplicateCase, ...negativeCases] = this.userData
+
+        const runUserUpdateStep = async (userData: UserData) => {
+            const {heading, email, password, confirmPassword, statusCode, successStatus, messageText} = userData
+
+            await test.step(`Verify User update with ${heading}`, async () => {
+                const response = await this.request.put(`${this.apiPrefix}user/${userId}`, {
+                    data: {
+                        email,
+                        password,
+                        confirmPassword
+                    },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+
+                expect(response.status()).toBe(statusCode)
+
+                const responseBody: UserRegistrationResponse = await response.json()
+
+                expect(responseBody.success).toBe(successStatus)
+                expect(responseBody.message).toBe(messageText)
+            })
+        }
+
+        await Promise.all(negativeCases.map(userData => runUserUpdateStep(userData)))
     }
 
     async updateUserAvatarSuccess(userId: string, token: string) {
