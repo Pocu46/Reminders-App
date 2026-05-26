@@ -35,7 +35,7 @@ export const createReminder = async (req: AuthenticatedRequest<{}, {}, CreateRem
     try {
         await reminder.save()
 
-        res.status(201).json({success: true, message: 'New Reminder created'})
+        res.status(201).json({success: true, message: 'New Reminder created.'})
     } catch (error: unknown) {
         const err = error as HttpError
         if(!err.statusCode) {
