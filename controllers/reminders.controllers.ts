@@ -114,7 +114,7 @@ export const getReminder = async (req: AuthenticatedRequest<{reminderId: string}
             updatedAt: existingReminder.updatedAt
         }
 
-        res.status(200).json({success: true, message: 'Reminder fetched', reminder: transformedReminder})
+        res.status(200).json({success: true, message: 'Reminder fetched.', reminder: transformedReminder})
     } catch (error: unknown) {
         const err = error as HttpError
         if (!err.statusCode) {

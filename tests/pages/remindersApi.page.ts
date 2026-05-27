@@ -24,11 +24,16 @@ type CreateReminderResponse = {
     reminderId?: string;
 }
 
-type GetReminderResponse = {
+type GetRemindersResponse = {
     success: boolean;
     message: string;
     totalReminders: number;
     reminders: Reminder[];
+}
+type GetReminderResponse = {
+    success: boolean;
+    message: string;
+    reminder: Reminder;
 }
 
 export class RemindersApiPage {
@@ -128,6 +133,18 @@ export class RemindersApiPage {
         })
 
         expect(response.status()).toBe(201)
+
+        const remindersResponse = await this.request.get(`${this.apiPrefix}reminders/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        expect(remindersResponse.status()).toBe(200)
+
+        const responseBody: GetRemindersResponse = await remindersResponse.json()
+        const reminderId = responseBody.reminders[0].id
+        return reminderId
     }
 
     async getReminders(token: string) {
@@ -140,7 +157,7 @@ export class RemindersApiPage {
 
             expect(response.status()).toBe(200)
 
-            const responseBody: GetReminderResponse = await response.json()
+            const responseBody: GetRemindersResponse = await response.json()
             expect(responseBody.success).toBe(true)
             expect(responseBody.message).toBe('Fetched Reminders successfully.')
             expect(Array.isArray(responseBody.reminders)).toBe(true)
@@ -154,8 +171,67 @@ export class RemindersApiPage {
 
             expect(response.status()).toBe(401)
 
+            const responseBody: GetRemindersResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+        })
+    }
+
+    async getReminderById(token: string, reminderId: string) {
+        test.step('Verify get Reminder by ID', async () => {
+            const response = await this.request.get(`${this.apiPrefix}reminders/${reminderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            expect(response.status()).toBe(200)
+
+            const responseBody: GetReminderResponse = await response.json()
+            expect(responseBody.success).toBe(true)
+            expect(responseBody.message).toBe('Reminder fetched.')
+            expect(responseBody.reminder.id).toBe(reminderId)
+        })
+    }
+
+    async getReminderByIdWithWrongId(token: string) {
+        test.step('Verify get Reminder by ID with invalid ID', async () => {
+            const response = await this.request.get(`${this.apiPrefix}reminders/invalidId`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            expect(response.status()).toBe(500)
+
             const responseBody: GetReminderResponse = await response.json()
             expect(responseBody.success).toBe(false)
+        })
+    }
+
+    async getReminderByIdWithoutToken(reminderId: string) {
+        test.step('Verify get Reminder by ID without token', async () => {
+            const response = await this.request.get(`${this.apiPrefix}reminders/${reminderId}`)
+
+            expect(response.status()).toBe(401)
+
+            const responseBody: GetReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+        })
+    }
+
+    async getReminderByIdWithWrongReminderId(token: string) {
+        test.step('Verify get Reminder by ID with wrong Reminder ID from another User', async () => {
+            const response = await this.request.get(`${this.apiPrefix}reminders/69f36daffdfd1c04b3df7be3`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+                expect(response.status()).toBe(404)
+
+            const responseBody: GetReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+            expect(responseBody.message).toBe('Reminder doesn\'t found.')
         })
     }
 }

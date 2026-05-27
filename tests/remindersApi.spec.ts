@@ -6,6 +6,7 @@ let api: UsersApiPage
 let userId: string
 let token: string
 let remindersApi: RemindersApiPage
+let reminderId: string
 
 test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     api = new UsersApiPage(request)
@@ -17,7 +18,7 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
     token = auth.token
 
     if (testInfo.title !== 'Create Reminder tests') {
-        await remindersApi.addNewReminder(token)
+        reminderId = await remindersApi.addNewReminder(token)
     }
 })
 
@@ -40,5 +41,12 @@ test.describe('Reminders API Tests', () => {
     test('Get Reminders tests', async () => {
         await remindersApi.getReminders(token)
         await remindersApi.getRemindersWithoutToken()
+    })
+
+    test('Get Reminder by ID tests', async () => {
+        await remindersApi.getReminderById(token, reminderId)
+        await remindersApi.getReminderByIdWithWrongId(token)
+        await remindersApi.getReminderByIdWithoutToken(reminderId)
+        await remindersApi.getReminderByIdWithWrongReminderId(token)
     })
 })
