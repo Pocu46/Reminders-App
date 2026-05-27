@@ -1,4 +1,5 @@
 import test, { APIRequestContext, expect } from '@playwright/test';
+import { UsersApiPage } from './usersApi.page';
 
 type ReminderData = {
     heading: string,
@@ -94,11 +95,10 @@ export class RemindersApiPage {
                 expect(responseBody.success).toBe(successStatus)
                 expect(responseBody.message).toBe(messageText)
             })
-
-            await createReminderStep(validReminderData)
-
-            await Promise.all(invalidReminderData.map(reminderData => createReminderStep(reminderData)))
         }
+
+        await createReminderStep(validReminderData)
+        await Promise.all(invalidReminderData.map(reminderData => createReminderStep(reminderData)))
     }
 
     async createReminderWithOutToken() {
@@ -219,9 +219,9 @@ export class RemindersApiPage {
         })
     }
 
-    async getReminderByIdWithWrongReminderId(token: string) {
+    async getReminderByIdWithWrongReminderId(token: string, id: string) {
         test.step('Verify get Reminder by ID with wrong Reminder ID from another User', async () => {
-            const response = await this.request.get(`${this.apiPrefix}reminders/69f36daffdfd1c04b3df7be3`, {
+            const response = await this.request.get(`${this.apiPrefix}reminders/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

@@ -7,6 +7,9 @@ let userId: string
 let token: string
 let remindersApi: RemindersApiPage
 let reminderId: string
+let id: string
+let otherUserId: string
+let otherUserToken: string
 
 test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     api = new UsersApiPage(request)
@@ -20,12 +23,22 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
     if (testInfo.title !== 'Create Reminder tests') {
         reminderId = await remindersApi.addNewReminder(token)
     }
+    if (testInfo.title === 'Get Reminder by ID tests') {
+        await api.userCreate()
+        const auth = await api.userAuth()
+        otherUserId = auth.userId
+        otherUserToken = auth.token
+        id = await remindersApi.addNewReminder(otherUserToken)
+    }
 })
 
 test.afterEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     try {
         if (userId && token) {
             await api.clearUser(userId, token)
+        }
+        if (testInfo.title === 'Get Reminder by ID tests') {
+            await api.clearUser(otherUserId, otherUserToken)
         }
     } catch (e) {
         console.error('Error during cleanup:', e)
@@ -47,6 +60,6 @@ test.describe('Reminders API Tests', () => {
         await remindersApi.getReminderById(token, reminderId)
         await remindersApi.getReminderByIdWithWrongId(token)
         await remindersApi.getReminderByIdWithoutToken(reminderId)
-        await remindersApi.getReminderByIdWithWrongReminderId(token)
+        await remindersApi.getReminderByIdWithWrongReminderId(token, id)
     })
 })
