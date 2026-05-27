@@ -9,10 +9,26 @@ type ReminderData = {
     messageText: string;
 }
 
+type Reminder = {
+    id: string;
+    title: string;
+    text: string;
+    creator: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 type CreateReminderResponse = {
     success: boolean;
     message: string;
     reminderId?: string;
+}
+
+type GetReminderResponse = {
+    success: boolean;
+    message: string;
+    totalReminders: number;
+    reminders: Reminder[];
 }
 
 export class RemindersApiPage {
@@ -81,18 +97,20 @@ export class RemindersApiPage {
     }
 
     async createReminderWithOutToken() {
-        const response = await this.request.post(`${this.apiPrefix}reminders/`, {
-            data: {
-                title: 'Test Reminder',
-                text: 'This is a test reminder.'
-            }
+        test.step('Verify create Reminder without token', async () => {
+            const response = await this.request.post(`${this.apiPrefix}reminders/`, {
+                data: {
+                    title: 'Test Reminder',
+                    text: 'This is a test reminder.'
+                }
+            })
+
+            expect(response.status()).toBe(401)
+
+            const responseBody: CreateReminderResponse = await response.json()
+
+            expect(responseBody.success).toBe(false)
         })
-
-        expect(response.status()).toBe(401)
-
-        const responseBody: CreateReminderResponse = await response.json()
-
-        expect(responseBody.success).toBe(false)
     }
 
     async addNewReminder(token: string) {
@@ -110,5 +128,34 @@ export class RemindersApiPage {
         })
 
         expect(response.status()).toBe(201)
+    }
+
+    async getReminders(token: string) {
+        test.step('Verify get Reminders', async () => {
+            const response = await this.request.get(`${this.apiPrefix}reminders/`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            expect(response.status()).toBe(200)
+
+            const responseBody: GetReminderResponse = await response.json()
+            expect(responseBody.success).toBe(true)
+            expect(responseBody.message).toBe('Fetched Reminders successfully.')
+            expect(Array.isArray(responseBody.reminders)).toBe(true)
+            expect(responseBody.totalReminders).toBeGreaterThanOrEqual(1)
+        })
+    }
+
+    async getRemindersWithoutToken() {
+        test.step('Verify get Reminders without token', async () => {
+            const response = await this.request.get(`${this.apiPrefix}reminders/`)
+
+            expect(response.status()).toBe(401)
+
+            const responseBody: GetReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+        })
     }
 }
