@@ -10,6 +10,7 @@ let reminderId: string
 let id: string
 let otherUserId: string
 let otherUserToken: string
+let otherApi: UsersApiPage
 
 test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     api = new UsersApiPage(request)
@@ -21,14 +22,35 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
     token = auth.token
 
     if (testInfo.title !== 'Create Reminder tests') {
-        reminderId = await remindersApi.addNewReminder(token)
+        const tempReminderId = await remindersApi.addNewReminder(token)
+        if (tempReminderId) {
+            reminderId = tempReminderId
+        } else {
+            throw new Error('Failed to create reminder for testing')
+        }
     }
     if (testInfo.title === 'Get Reminder by ID tests') {
-        await api.userCreate()
-        const auth = await api.userAuth()
-        otherUserId = auth.userId
-        otherUserToken = auth.token
-        id = await remindersApi.addNewReminder(otherUserToken)
+        // await api.userCreate()
+        // const auth = await api.userAuth()
+        // otherUserId = auth.userId
+        // otherUserToken = auth.token
+        // const tempId = await remindersApi.addNewReminder(otherUserToken)
+        // if (tempId) {
+        //     id = tempId
+        // } else {
+        //     throw new Error('Failed to create reminder for testing')
+        // }
+        otherApi = new UsersApiPage(request)
+        await otherApi.userCreate()
+        const otherAuth = await otherApi.userAuth()
+        otherUserId = otherAuth.userId
+        otherUserToken = otherAuth.token
+        const tempId = await remindersApi.addNewReminder(otherUserToken)
+        if (tempId) {
+            id = tempId
+        } else {
+            throw new Error('Failed to create reminder for testing')
+        }
     }
 })
 
@@ -38,7 +60,7 @@ test.afterEach(async ({ request }: { request: APIRequestContext }, testInfo) => 
             await api.clearUser(userId, token)
         }
         if (testInfo.title === 'Get Reminder by ID tests') {
-            await api.clearUser(otherUserId, otherUserToken)
+            await otherApi.clearUser(otherUserId, otherUserToken)
         }
     } catch (e) {
         console.error('Error during cleanup:', e)

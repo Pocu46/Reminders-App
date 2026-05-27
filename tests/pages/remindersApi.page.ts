@@ -102,7 +102,7 @@ export class RemindersApiPage {
     }
 
     async createReminderWithOutToken() {
-        test.step('Verify create Reminder without token', async () => {
+        await test.step('Verify create Reminder without token', async () => {
             const response = await this.request.post(`${this.apiPrefix}reminders/`, {
                 data: {
                     title: 'Test Reminder',
@@ -119,7 +119,8 @@ export class RemindersApiPage {
     }
 
     async addNewReminder(token: string) {
-        const title = `Test Reminder ${Date.now()}`
+        const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+        const title = `Test Reminder ${uniqueId}`
         const text = 'lorem ipsum dolor sit amet, consectetur adipiscing elit.'  
 
         const response = await this.request.post(`${this.apiPrefix}reminders/`, {
@@ -143,12 +144,12 @@ export class RemindersApiPage {
         expect(remindersResponse.status()).toBe(200)
 
         const responseBody: GetRemindersResponse = await remindersResponse.json()
-        const reminderId = responseBody.reminders[0].id
+        const reminderId = responseBody.reminders.find(r => r.title === title)?.id
         return reminderId
     }
 
     async getReminders(token: string) {
-        test.step('Verify get Reminders', async () => {
+        await test.step('Verify get Reminders', async () => {
             const response = await this.request.get(`${this.apiPrefix}reminders/`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -166,7 +167,7 @@ export class RemindersApiPage {
     }
 
     async getRemindersWithoutToken() {
-        test.step('Verify get Reminders without token', async () => {
+        await test.step('Verify get Reminders without token', async () => {
             const response = await this.request.get(`${this.apiPrefix}reminders/`)
 
             expect(response.status()).toBe(401)
@@ -177,7 +178,7 @@ export class RemindersApiPage {
     }
 
     async getReminderById(token: string, reminderId: string) {
-        test.step('Verify get Reminder by ID', async () => {
+        await test.step('Verify get Reminder by ID', async () => {
             const response = await this.request.get(`${this.apiPrefix}reminders/${reminderId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -194,7 +195,7 @@ export class RemindersApiPage {
     }
 
     async getReminderByIdWithWrongId(token: string) {
-        test.step('Verify get Reminder by ID with invalid ID', async () => {
+        await test.step('Verify get Reminder by ID with invalid ID', async () => {
             const response = await this.request.get(`${this.apiPrefix}reminders/invalidId`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -209,7 +210,7 @@ export class RemindersApiPage {
     }
 
     async getReminderByIdWithoutToken(reminderId: string) {
-        test.step('Verify get Reminder by ID without token', async () => {
+        await test.step('Verify get Reminder by ID without token', async () => {
             const response = await this.request.get(`${this.apiPrefix}reminders/${reminderId}`)
 
             expect(response.status()).toBe(401)
@@ -220,14 +221,14 @@ export class RemindersApiPage {
     }
 
     async getReminderByIdWithWrongReminderId(token: string, id: string) {
-        test.step('Verify get Reminder by ID with wrong Reminder ID from another User', async () => {
+        await test.step('Verify get Reminder by ID with wrong Reminder ID from another User', async () => {
             const response = await this.request.get(`${this.apiPrefix}reminders/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             })
 
-                expect(response.status()).toBe(404)
+            expect(response.status()).toBe(404)
 
             const responseBody: GetReminderResponse = await response.json()
             expect(responseBody.success).toBe(false)
