@@ -29,17 +29,7 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
             throw new Error('Failed to create reminder for testing')
         }
     }
-    if (testInfo.title === 'Get Reminder by ID tests') {
-        // await api.userCreate()
-        // const auth = await api.userAuth()
-        // otherUserId = auth.userId
-        // otherUserToken = auth.token
-        // const tempId = await remindersApi.addNewReminder(otherUserToken)
-        // if (tempId) {
-        //     id = tempId
-        // } else {
-        //     throw new Error('Failed to create reminder for testing')
-        // }
+    if (testInfo.title === 'Get Reminder by ID tests' || testInfo.title === 'Edit Reminder tests' || testInfo.title === 'Delete Reminder tests') {
         otherApi = new UsersApiPage(request)
         await otherApi.userCreate()
         const otherAuth = await otherApi.userAuth()
@@ -83,5 +73,17 @@ test.describe('Reminders API Tests', () => {
         await remindersApi.getReminderByIdWithWrongId(token)
         await remindersApi.getReminderByIdWithoutToken(reminderId)
         await remindersApi.getReminderByIdWithWrongReminderId(token, id)
+    })
+
+    test('Edit Reminder tests', async () => {
+        await remindersApi.editReminder(token, reminderId)
+        await remindersApi.editReminderWithOutToken(reminderId)
+        await remindersApi.editReminderWithAnotherUserToken(otherUserToken, reminderId)
+    })
+
+    test('Delete Reminder tests', async () => {
+        await remindersApi.deleteReminder(token, reminderId)
+        await remindersApi.deleteReminderWithOutToken(reminderId)
+        await remindersApi.deleteReminderWithAnotherUserToken(otherUserToken, reminderId)
     })
 })

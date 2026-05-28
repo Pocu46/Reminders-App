@@ -42,8 +42,7 @@ type GetUserDataResponse = {
 export class UsersApiPage {
     readonly request: APIRequestContext
     readonly apiPrefix: string = 'api/v1/'
-    // readonly testEmail: string = `test_${Date.now()}_${crypto.randomUUID()}@example.com`
-    readonly testEmail: string = `test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}@example.com`
+    readonly testEmail: string = `test_${Date.now()}_${crypto.randomUUID()}@example.com`
     readonly testPassword: string = 'Text1909892'
     readonly userData: UserData[]
     readonly userLoginData: UserData[]

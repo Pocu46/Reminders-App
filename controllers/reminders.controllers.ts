@@ -128,7 +128,7 @@ export const getReminder = async (req: AuthenticatedRequest<{reminderId: string}
 export const editReminder = async (req: AuthenticatedRequest<{reminderId: string}, {}, CreateReminderBody>, res: Response<EditReminderSuccessResponse | EditReminderErrorResponse | EditReminderValidationErrorResponse>, next: NextFunction) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(422).json({message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
+        return res.status(422).json({success: false, message: 'Validation failed, entered data is incorrect.', errors: errors.array()})
     }
 
     const reminderId = req.params.reminderId
@@ -162,7 +162,7 @@ export const editReminder = async (req: AuthenticatedRequest<{reminderId: string
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
-        res.status(200).json({success: true, message: 'Reminder was updated'})
+        res.status(200).json({success: true, message: 'Reminder was updated.'})
     } catch (error: unknown) {
         const err = error as HttpError
         if (!err.statusCode) {
@@ -195,7 +195,7 @@ export const deleteReminder = async (req: AuthenticatedRequest<{reminderId: stri
             return res.status(404).json({success: false, message: 'Reminder doesn\'t found.'})
         }
 
-        res.status(200).json({success: true, message: 'Reminder was deleted'})
+        res.status(200).json({success: true, message: 'Reminder was deleted.'})
     } catch (error: unknown) {
         const err = error as HttpError
         if (!err.statusCode) {

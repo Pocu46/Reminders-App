@@ -1,5 +1,4 @@
 import test, { APIRequestContext, expect } from '@playwright/test';
-import { UsersApiPage } from './usersApi.page';
 
 type ReminderData = {
     heading: string,
@@ -41,12 +40,13 @@ export class RemindersApiPage {
     readonly request: APIRequestContext
     readonly apiPrefix: string = 'api/v1/'
     readonly remindersData: ReminderData[]
+    readonly editRemindersData: ReminderData[]
 
     constructor(request: APIRequestContext) {
         this.request = request
         this.remindersData = [
             {
-                heading: 'Verify create Reminder with valid data',
+                heading: 'Reminder with valid data',
                 title: 'Test Reminder',
                 text: 'This is a test reminder.',
                 statusCode: 201,
@@ -54,7 +54,7 @@ export class RemindersApiPage {
                 messageText: 'New Reminder created.'
             },
             {
-                heading: 'Verify create Reminder with Title less than 3 characters',
+                heading: 'Reminder with Title less than 3 characters',
                 title: 'Te',               
                 text: 'This is a test reminder.',
                 statusCode: 422,
@@ -62,7 +62,33 @@ export class RemindersApiPage {
                 messageText: 'Validation failed, entered data is incorrect.'
             },
             {
-                heading: 'Verify create Reminder with Text less than 3 characters',
+                heading: 'Reminder with Text less than 3 characters',
+                title: 'Test Reminder',
+                text: 'Te',
+                statusCode: 422,
+                successStatus: false,
+                messageText: 'Validation failed, entered data is incorrect.'
+            }
+        ]
+        this.editRemindersData = [
+            {
+                heading: 'Reminder with valid data',
+                title: 'Test Reminder',
+                text: 'This is a test reminder.',
+                statusCode: 200,
+                successStatus: true,
+                messageText: 'Reminder was updated.'
+            },
+            {
+                heading: 'Reminder with Title less than 3 characters',
+                title: 'Te',               
+                text: 'This is a test reminder.',
+                statusCode: 422,
+                successStatus: false,
+                messageText: 'Validation failed, entered data is incorrect.'
+            },
+            {
+                heading: 'Reminder with Text less than 3 characters',
                 title: 'Test Reminder',
                 text: 'Te',
                 statusCode: 422,
@@ -78,7 +104,7 @@ export class RemindersApiPage {
         const createReminderStep = async (reminderData: ReminderData) => {
             const { heading, title, text, statusCode, successStatus, messageText } = reminderData
 
-            await test.step(heading, async () => {
+            await test.step(`Verify create ${heading}`, async () => {
                 const response = await this.request.post(`${this.apiPrefix}reminders/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -231,6 +257,114 @@ export class RemindersApiPage {
             expect(response.status()).toBe(404)
 
             const responseBody: GetReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+            expect(responseBody.message).toBe('Reminder doesn\'t found.')
+        })
+    }
+
+    async editReminder(token: string, reminderId: string) {
+        const [validReminderData, ...invalidReminderData] = this.editRemindersData
+
+        const editReminderStep = async (reminderData: ReminderData) => {
+            const { heading, title, text, statusCode, successStatus, messageText } = reminderData
+
+            await test.step(`Verify edit ${heading}`, async () => {
+                const response = await this.request.put(`${this.apiPrefix}reminders/${reminderId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    data: {
+                        title,
+                        text
+                    }
+                })
+                expect(response.status()).toBe(statusCode)
+
+                const responseBody: CreateReminderResponse = await response.json()
+
+                expect(responseBody.success).toBe(successStatus)
+                expect(responseBody.message).toBe(messageText)
+            })
+        }
+
+        await editReminderStep(validReminderData)
+        await Promise.all(invalidReminderData.map(reminderData => editReminderStep(reminderData)))
+    }
+
+    async editReminderWithOutToken(reminderId: string) {
+        await test.step('Verify edit Reminder without token', async () => {
+            const response = await this.request.put(`${this.apiPrefix}reminders/${reminderId}`, {
+                data: {
+                    title: 'Updated Test Reminder',
+                    text: 'This is an updated test reminder.'
+                }
+            })
+
+            expect(response.status()).toBe(401)
+
+            const responseBody: CreateReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+        })
+    }
+
+    async editReminderWithAnotherUserToken(token: string, reminderId: string) {
+        await test.step('Verify edit Reminder with another User token', async () => {
+            const response = await this.request.put(`${this.apiPrefix}reminders/${reminderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                data: {
+                    title: 'Updated Test Reminder',
+                    text: 'This is an updated test reminder.'
+                }
+            })
+
+            expect(response.status()).toBe(404)
+
+            const responseBody: CreateReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+            expect(responseBody.message).toBe('Reminder doesn\'t found.')
+        })
+    }
+
+    async deleteReminder(token: string, reminderId: string) {
+        await test.step('Verify delete Reminder', async () => {
+            const response = await this.request.delete(`${this.apiPrefix}reminders/${reminderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            expect(response.status()).toBe(200)
+
+            const responseBody: CreateReminderResponse = await response.json()
+            expect(responseBody.success).toBe(true)
+            expect(responseBody.message).toBe('Reminder was deleted.')
+        })
+    }
+
+    async deleteReminderWithOutToken(reminderId: string) {
+        await test.step('Verify delete Reminder without token', async () => {
+            const response = await this.request.delete(`${this.apiPrefix}reminders/${reminderId}`)
+
+            expect(response.status()).toBe(401)
+
+            const responseBody: CreateReminderResponse = await response.json()
+            expect(responseBody.success).toBe(false)
+        })
+    }
+
+    async deleteReminderWithAnotherUserToken(token: string, reminderId: string) {
+        await test.step('Verify delete Reminder with another User token', async () => {
+            const response = await this.request.delete(`${this.apiPrefix}reminders/${reminderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            expect(response.status()).toBe(404)
+
+            const responseBody: CreateReminderResponse = await response.json()
             expect(responseBody.success).toBe(false)
             expect(responseBody.message).toBe('Reminder doesn\'t found.')
         })
