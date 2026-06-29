@@ -4,7 +4,6 @@
   "description": "reminders app build with Next.js and Express",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/app.js",
     "dev": "nodemon app.ts"
@@ -30,6 +29,7 @@
     "picomatch": "^2.3.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.1.0",

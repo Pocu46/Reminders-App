@@ -16,7 +16,7 @@ export const registration = async (req: Request<{}, {}, CreateUser>, res: Respon
     const { email, password, confirmPassword } = req.body
 
     if(password !== confirmPassword) {
-        return res.status(400).json({success: false, message: 'Password and Confirm Password fields should match.'})
+        return res.status(401).json({success: false, message: 'Password and Confirm Password fields should match.'})
     }
 
     const avatarPath: string = path.join(__dirname, '../images/default-avatar.png')
@@ -29,7 +29,7 @@ export const registration = async (req: Request<{}, {}, CreateUser>, res: Respon
             email,
             password: hashedPassword,
             image: {
-                imageName: `${new Date().toISOString()}-${avatarName.replace(/:/g, '-')}`,
+                imageName: avatarName,
                 imageLink: avatarPath
             }
         })
@@ -42,7 +42,7 @@ export const registration = async (req: Request<{}, {}, CreateUser>, res: Respon
 
         await user.save()
 
-        res.status(201).json({success: true, message: 'New User created'})
+        res.status(201).json({success: true, message: 'New User created!'})
     } catch (error: unknown) {
         const err = error as HttpError
         if(!err.statusCode) {
