@@ -14,7 +14,8 @@ let otherApi: UsersApiPage
 
 test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
     api = new UsersApiPage(request)
-    remindersApi = new RemindersApiPage(api.request)
+    remindersApi = new RemindersApiPage(request)
+    otherApi = new UsersApiPage(request)
 
     await api.userCreate()
     const auth = await api.userAuth()
@@ -30,7 +31,6 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
         }
     }
     if (testInfo.title === 'Get Reminder by ID tests' || testInfo.title === 'Edit Reminder tests' || testInfo.title === 'Delete Reminder tests') {
-        otherApi = new UsersApiPage(request)
         await otherApi.userCreate()
         const otherAuth = await otherApi.userAuth()
         otherUserId = otherAuth.userId
@@ -44,12 +44,16 @@ test.beforeEach(async ({ request }: { request: APIRequestContext }, testInfo) =>
     }
 })
 
-test.afterEach(async ({ request }: { request: APIRequestContext }, testInfo) => {
+test.afterEach(async ({ request }, testInfo) => {
     try {
         if (userId && token) {
             await api.clearUser(userId, token)
         }
-        if (testInfo.title === 'Get Reminder by ID tests') {
+        if (
+            testInfo.title === 'Get Reminder by ID tests' ||
+            testInfo.title === 'Edit Reminder tests' ||
+            testInfo.title === 'Delete Reminder tests'
+        ) {
             await otherApi.clearUser(otherUserId, otherUserToken)
         }
     } catch (e) {
