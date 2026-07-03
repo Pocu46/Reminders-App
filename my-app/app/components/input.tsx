@@ -1,7 +1,7 @@
-const Input = ({ email, placeholder, className }: { email: string; placeholder: string; className: string; }) => {
+const Input = ({ type, placeholder, className }: { type: string; placeholder: string; className: string; }) => {
   return (
         <input
-          type={email}
+          type={type}
           placeholder={placeholder}
           className={className}
         />
